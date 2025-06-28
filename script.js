@@ -61,8 +61,6 @@ window.addEventListener("DOMContentLoaded", () => {
       const base = Math.min(cssWidth, cssHeight);
       const sizePx = base * (minSizeRatio + Math.random() * (maxSizeRatio - minSizeRatio));
       this.radius = sizePx / 2;
-
-      this.cooldown = false;
     }
 
     update() {
@@ -83,7 +81,6 @@ window.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      // Repulsion from nearby particles
       for (let other of particles) {
         if (other === this) continue;
         const dx = this.x - other.x;
@@ -106,14 +103,9 @@ window.addEventListener("DOMContentLoaded", () => {
       if (this.y < 0) this.y = cssHeight;
       if (this.y > cssHeight) this.y = 0;
 
-      if (dist < this.radius && !this.cooldown) {
-        playClick(1);
-        this.cooldown = true;
-        setTimeout(() => (this.cooldown = false), 100);
-      }
-
       return dist < 40;
     }
+
     draw() {
       const glowRadius = this.radius * 30;
       const flicker = 0.15 + Math.random() * 0.05;
@@ -137,10 +129,6 @@ window.addEventListener("DOMContentLoaded", () => {
       ctx.fillStyle = "white";
       ctx.fill();
     }
-
-
-
-
   }
 
   for (let i = 0; i < totalParticles; i++) {
@@ -190,6 +178,13 @@ window.addEventListener("DOMContentLoaded", () => {
           if (isNear) reached++;
         }
         p.draw();
+      }
+
+      // Geigerzähler-Sound
+      const chance = reached > 0 ? Math.max(0.1, reached / totalParticles) : 0;
+
+      if (Math.random() < chance) {
+        playClick(chance);
       }
 
       if (reached >= activeFlies * 0.95) {

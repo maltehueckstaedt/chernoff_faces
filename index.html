@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Geiger-Partikel</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Playwrite+FR+Trad&display=swap" rel="stylesheet">
   <style>
     html, body {
       margin: 0;
@@ -22,35 +23,77 @@
       height: 844px;
       position: relative;
       background-color: black;
-      box-shadow: 0 0 30px rgba(255, 255, 255, 0.1); 
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
       overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     canvas {
       width: 100%;
       height: 100%;
       display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
     }
 
     #soundButton {
-      position: absolute;
       z-index: 10;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 10px 20px;
-      font-size: 16px;
-      background: white;
-      color: black; 
+      padding: 20px 40px;
+      font-size: 20px;
+      font-family: 'Playwrite FR Trad', cursive;
+      background: transparent;
+      color: white;
       cursor: pointer;
+      border: 2px solid white;
+      border-radius: 999px;
+      box-shadow:
+        0 0 4px white,
+        0 0 10px rgba(255, 255, 200, 0.6),
+        0 0 25px rgba(255, 255, 180, 0.5),
+        0 0 45px rgba(255, 230, 150, 0.3),
+        inset 0 0 8px white,
+        inset 0 0 16px rgba(255, 255, 200, 0.6),
+        inset 0 0 30px rgba(255, 240, 180, 0.4);
+      transition: box-shadow 0.05s ease;
     }
   </style>
 </head>
 <body>
   <div id="iphone-frame">
-    <button id="soundButton">Sound aktivieren</button>
+    <button id="soundButton">Son activé</button>
     <canvas id="canvas"></canvas>
   </div>
+
+<script>
+  const button = document.getElementById('soundButton');
+  let t = 0;
+
+  function animateGlow() {
+    const f = 0.4 + 0.6 * Math.sin(t); // Pulswert 0.4–1.0
+
+    // Mehrschichtiger Glow
+    button.style.boxShadow = `
+      0 0 8px rgba(255, 255, 255, ${f * 0.8}),        /* Kernlicht */
+      0 0 20px rgba(255, 255, 180, ${f * 0.6}),
+      0 0 40px rgba(255, 240, 160, ${f * 0.4}),
+      0 0 80px rgba(255, 220, 130, ${f * 0.2}),
+      inset 0 0 10px rgba(255, 255, 200, ${f * 0.5}),
+      inset 0 0 30px rgba(255, 240, 180, ${f * 0.4}),
+      inset 0 0 60px rgba(255, 220, 130, ${f * 0.3})
+    `;
+
+    t += 0.015;
+    requestAnimationFrame(animateGlow);
+  }
+
+  animateGlow();
+</script>
+
+
   <script src="script.js"></script>
 </body>
 </html>
