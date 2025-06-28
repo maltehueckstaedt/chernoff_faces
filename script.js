@@ -20,7 +20,32 @@ window.addEventListener("DOMContentLoaded", () => {
 
   let mouse = { x: cssWidth / 2, y: cssHeight / 2 };
   const particles = [];
-  const totalParticles = 100;
+  const totalParticles = 10;
+
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  function playClick(intensity = 0) {
+    const now = audioCtx.currentTime;
+    const bufferSize = audioCtx.sampleRate * 0.02;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2);
+    }
+
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+
+    const gain = audioCtx.createGain();
+    const volume = 0.05 + intensity * 0.15;
+    gain.gain.setValueAtTime(volume, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
+
+    noise.connect(gain).connect(audioCtx.destination);
+    noise.start(now);
+    noise.stop(now + 0.02);
+  }
 
   class Particle {
     constructor() {
@@ -31,11 +56,13 @@ window.addEventListener("DOMContentLoaded", () => {
       this.speed = 1 + Math.random();
       this.ignoresMouse = Math.random() < 0.15;
 
-      const minSizeRatio = 0.02;
+      const minSizeRatio = 0.01;
       const maxSizeRatio = 0.01;
       const base = Math.min(cssWidth, cssHeight);
       const sizePx = base * (minSizeRatio + Math.random() * (maxSizeRatio - minSizeRatio));
       this.radius = sizePx / 2;
+
+      this.cooldown = false;
     }
 
     update() {
@@ -56,34 +83,62 @@ window.addEventListener("DOMContentLoaded", () => {
         }
       }
 
+      // Repulsion from nearby particles
+      for (let other of particles) {
+        if (other === this) continue;
+        const dx = this.x - other.x;
+        const dy = this.y - other.y;
+        const d = Math.hypot(dx, dy);
+        if (d < this.radius * 3) {
+          this.vx += dx / d * 0.05;
+          this.vy += dy / d * 0.05;
+        }
+      }
+
       this.vx *= 0.92;
       this.vy *= 0.92;
 
       this.x += this.vx;
       this.y += this.vy;
 
-      // Begrenzung innerhalb des sichtbaren Bereichs
       if (this.x < 0) this.x = cssWidth;
       if (this.x > cssWidth) this.x = 0;
       if (this.y < 0) this.y = cssHeight;
       if (this.y > cssHeight) this.y = 0;
 
-      return dist < 20;
+      if (dist < this.radius && !this.cooldown) {
+        playClick(1);
+        this.cooldown = true;
+        setTimeout(() => (this.cooldown = false), 100);
+      }
+
+      return dist < 40;
+    }
+    draw() {
+      const glowRadius = this.radius * 30;
+      const flicker = 0.15 + Math.random() * 0.05;
+
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+
+      const gradient = ctx.createRadialGradient(this.x, this.y, this.radius, this.x, this.y, glowRadius);
+      gradient.addColorStop(0.0, `rgba(255, 255, 200, ${flicker})`);
+      gradient.addColorStop(1.0, "rgba(0, 0, 0, 0)");
+
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, glowRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = "white";
+      ctx.fill();
     }
 
-draw() {
-  ctx.beginPath();
-  ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
 
-  ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-  ctx.shadowColor = "rgba(255, 255, 255, 0.8)";
-  ctx.shadowBlur = this.radius * 2.5;
-
-  ctx.fill();
-
-  // Wichtig: Zurücksetzen, damit andere Zeichen nicht leuchten
-  ctx.shadowBlur = 0;
-}
 
 
   }
@@ -122,7 +177,6 @@ draw() {
     }, 100);
   }
 
-
   function animate() {
     if (!flackernd) {
       ctx.clearRect(0, 0, cssWidth, cssHeight);
@@ -147,5 +201,11 @@ draw() {
     }
   }
 
-  animate();
+  const soundButton = document.getElementById("soundButton");
+  soundButton.addEventListener("click", () => {
+    audioCtx.resume().then(() => {
+      soundButton.style.display = "none";
+      animate();
+    });
+  });
 });

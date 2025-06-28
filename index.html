@@ -1,13 +1,54 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>iPhone-Canvas</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>Geiger-Partikel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: black;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #iphone-frame {
+      width: 390px;
+      height: 844px;
+      position: relative;
+      background-color: black;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.1); 
+      overflow: hidden;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    #soundButton {
+      position: absolute;
+      z-index: 10;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      font-size: 16px;
+      background: white;
+      color: black; 
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
   <div id="iphone-frame">
+    <button id="soundButton">Sound aktivieren</button>
     <canvas id="canvas"></canvas>
   </div>
   <script src="script.js"></script>
