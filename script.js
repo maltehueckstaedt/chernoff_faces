@@ -2,29 +2,40 @@ window.addEventListener("DOMContentLoaded", () => {
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
 
-  let width = canvas.width = window.innerWidth;
-  let height = canvas.height = window.innerHeight;
+  const cssWidth = 390;
+  const cssHeight = 844;
+  let width, height;
 
   function resizeCanvas() {
-    width = canvas.width = window.innerWidth;
-    height = canvas.height = window.innerHeight;
-    canvas.style.width = width + "px";
-    canvas.style.height = height + "px";
+    const dpr = window.devicePixelRatio || 1;
+    width = canvas.width = cssWidth * dpr;
+    height = canvas.height = cssHeight * dpr;
+    canvas.style.width = cssWidth + "px";
+    canvas.style.height = cssHeight + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
+
   resizeCanvas();
   window.addEventListener("resize", resizeCanvas);
 
-  let mouse = { x: width / 2, y: height / 2 };
+  let mouse = { x: cssWidth / 2, y: cssHeight / 2 };
   const particles = [];
   const totalParticles = 100;
 
   class Particle {
     constructor() {
-      this.x = Math.random() * width;
-      this.y = Math.random() * height;
+      this.x = Math.random() * cssWidth;
+      this.y = Math.random() * cssHeight;
       this.vx = 0;
       this.vy = 0;
-      this.speed = 1 + Math.random() * 1;
+      this.speed = 1 + Math.random();
+      this.ignoresMouse = Math.random() < 0.15;
+
+      const minSizeRatio = 0.02;
+      const maxSizeRatio = 0.01;
+      const base = Math.min(cssWidth, cssHeight);
+      const sizePx = base * (minSizeRatio + Math.random() * (maxSizeRatio - minSizeRatio));
+      this.radius = sizePx / 2;
     }
 
     update() {
@@ -32,32 +43,49 @@ window.addEventListener("DOMContentLoaded", () => {
       const dy = mouse.y - this.y;
       const dist = Math.hypot(dx, dy);
 
-      // kleine chaotische Störung
-      this.vx += (Math.random() - 0.5) * 0.5;
-      this.vy += (Math.random() - 0.5) * 0.5;
+      if (this.ignoresMouse && dist > 150) {
+        this.vx += (Math.random() - 0.5) * 0.5;
+        this.vy += (Math.random() - 0.5) * 0.5;
+      } else {
+        this.vx += (Math.random() - 0.5) * 0.3;
+        this.vy += (Math.random() - 0.5) * 0.3;
 
-      // Anziehung zur Maus
-      if (dist > 10) {
-        this.vx += dx / dist * 0.05;
-        this.vy += dy / dist * 0.05;
+        if (dist > 10) {
+          this.vx += dx / dist * 0.05;
+          this.vy += dy / dist * 0.05;
+        }
       }
 
-      // Begrenze Geschwindigkeit
-      this.vx *= 0.9;
-      this.vy *= 0.9;
+      this.vx *= 0.92;
+      this.vy *= 0.92;
 
       this.x += this.vx;
       this.y += this.vy;
 
-      return dist < 25; // "nah genug"
+      // Begrenzung innerhalb des sichtbaren Bereichs
+      if (this.x < 0) this.x = cssWidth;
+      if (this.x > cssWidth) this.x = 0;
+      if (this.y < 0) this.y = cssHeight;
+      if (this.y > cssHeight) this.y = 0;
+
+      return dist < 20;
     }
 
-    draw() {
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, 1.5, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(255,255,255,0.8)";
-      ctx.fill();
-    }
+draw() {
+  ctx.beginPath();
+  ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+
+  ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+  ctx.shadowColor = "rgba(255, 255, 255, 0.8)";
+  ctx.shadowBlur = this.radius * 2.5;
+
+  ctx.fill();
+
+  // Wichtig: Zurücksetzen, damit andere Zeichen nicht leuchten
+  ctx.shadowBlur = 0;
+}
+
+
   }
 
   for (let i = 0; i < totalParticles; i++) {
@@ -65,25 +93,27 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateMousePosition(e) {
+    const rect = canvas.getBoundingClientRect();
     if (e.touches) {
-      mouse.x = e.touches[0].clientX;
-      mouse.y = e.touches[0].clientY;
+      mouse.x = e.touches[0].clientX - rect.left;
+      mouse.y = e.touches[0].clientY - rect.top;
     } else {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
     }
   }
 
-  window.addEventListener("mousemove", updateMousePosition);
-  window.addEventListener("touchmove", updateMousePosition, { passive: false });
+  canvas.addEventListener("mousemove", updateMousePosition);
+  canvas.addEventListener("touchmove", updateMousePosition, { passive: false });
 
   let flackernd = false;
   let flackerTimer = 0;
 
   function flackernUndWeiter() {
     const interval = setInterval(() => {
-      document.body.style.backgroundColor =
-        document.body.style.backgroundColor === "black" ? "white" : "black";
+      const color = flackerTimer % 2 === 0 ? "white" : "black";
+      ctx.fillStyle = color;
+      ctx.fillRect(0, 0, cssWidth, cssHeight);
       flackerTimer++;
       if (flackerTimer > 10) {
         clearInterval(interval);
@@ -92,16 +122,23 @@ window.addEventListener("DOMContentLoaded", () => {
     }, 100);
   }
 
+
   function animate() {
     if (!flackernd) {
-      ctx.clearRect(0, 0, width, height);
-      let allReached = true;
+      ctx.clearRect(0, 0, cssWidth, cssHeight);
+      let reached = 0;
+      let activeFlies = 0;
+
       for (let p of particles) {
-        const reached = p.update();
-        if (!reached) allReached = false;
+        const isNear = p.update();
+        if (!p.ignoresMouse) {
+          activeFlies++;
+          if (isNear) reached++;
+        }
         p.draw();
       }
-      if (allReached) {
+
+      if (reached >= activeFlies * 0.95) {
         flackernd = true;
         flackernUndWeiter();
       } else {
