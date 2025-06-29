@@ -24,7 +24,10 @@ html, body {
 #iphone-frame {
   width: 390px;
   height: 724px;
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
   background-color: black;
   overflow: hidden;
   border-radius: 20px;
@@ -34,6 +37,7 @@ html, body {
   justify-content: center;
   padding-bottom: env(safe-area-inset-bottom);
 }
+
 
 /* Animation-Container */
 .container {
