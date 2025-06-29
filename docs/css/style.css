@@ -119,7 +119,7 @@ html, body {
 /* Button-Bereich */
 .bottom-buttons {
   position: absolute;
-  bottom: calc(24px + env(safe-area-inset-bottom));
+  bottom: calc(54px + env(safe-area-inset-bottom));
   width: 100%;
   display: grid;
   grid-template-columns: repeat(4, auto);
