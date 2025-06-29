@@ -118,7 +118,7 @@ html, body {
 /* Button-Bereich */
 .bottom-buttons {
   position: absolute;
-  bottom: 24px;
+  bottom: calc(24px + env(safe-area-inset-bottom));
   width: 100%;
   display: grid;
   grid-template-columns: repeat(4, auto);
@@ -126,8 +126,9 @@ html, body {
   row-gap: 12px;
   justify-content: center;
   z-index: 10;
-  padding: 0 12px;
+  padding: 0 12px env(safe-area-inset-bottom);
 }
+
 
 /* Einzelner Button */
 .button-wrapper {
