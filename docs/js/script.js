@@ -2,8 +2,8 @@ window.addEventListener("DOMContentLoaded", () => {
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
 
-  const cssWidth = 390;
-  const cssHeight = 844;
+  const cssWidth = 380;
+  const cssHeight = 714;
   let width, height;
 
   function resizeCanvas() {
@@ -33,7 +33,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const data = buffer.getChannelData(0);
 
     for (let i = 0; i < bufferSize; i++) {
-      data[i] = Math.random() * 2 - 1; // reines Rauschen
+      data[i] = Math.random() * 2 - 1;
     }
 
     const noise = audioCtx.createBufferSource();
@@ -51,7 +51,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function playGlitchNoise() {
     const now = audioCtx.currentTime;
-    const bufferSize = audioCtx.sampleRate * 0.08; // ~80ms
+    const bufferSize = audioCtx.sampleRate * 0.08;
     const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
     const data = buffer.getChannelData(0);
 
@@ -123,10 +123,23 @@ window.addEventListener("DOMContentLoaded", () => {
       this.x += this.vx;
       this.y += this.vy;
 
-      if (this.x < 0) this.x = cssWidth;
-      if (this.x > cssWidth) this.x = 0;
-      if (this.y < 0) this.y = cssHeight;
-      if (this.y > cssHeight) this.y = 0;
+      const padding = this.radius;
+      if (this.x < padding) {
+        this.x = padding;
+        this.vx *= -0.5;
+      }
+      if (this.x > cssWidth - padding) {
+        this.x = cssWidth - padding;
+        this.vx *= -0.5;
+      }
+      if (this.y < padding) {
+        this.y = padding;
+        this.vy *= -0.5;
+      }
+      if (this.y > cssHeight - padding) {
+        this.y = cssHeight - padding;
+        this.vy *= -0.5;
+      }
 
       return dist < 40;
     }
@@ -180,7 +193,7 @@ window.addEventListener("DOMContentLoaded", () => {
       ctx.fillStyle = color;
       ctx.fillRect(0, 0, cssWidth, cssHeight);
 
-      if (soundEnabled) playGlitchNoise(); // <– hier wird Störgeräusch abgespielt
+      if (soundEnabled) playGlitchNoise();
 
       flackerTimer++;
       if (flackerTimer > 10) {
