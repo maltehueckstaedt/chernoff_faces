@@ -33,7 +33,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const data = buffer.getChannelData(0);
 
     for (let i = 0; i < bufferSize; i++) {
-      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2);
+      data[i] = Math.random() * 2 - 1; // reines Rauschen
     }
 
     const noise = audioCtx.createBufferSource();
@@ -49,6 +49,29 @@ window.addEventListener("DOMContentLoaded", () => {
     noise.stop(now + 0.02);
   }
 
+  function playGlitchNoise() {
+    const now = audioCtx.currentTime;
+    const bufferSize = audioCtx.sampleRate * 0.08; // ~80ms
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+
+    for (let i = 0; i < bufferSize; i++) {
+      const noise = Math.random() * 2 - 1;
+      const glitch = (i % 200 < 20) ? noise * 0.9 : noise * 0.2;
+      data[i] = glitch;
+    }
+
+    const source = audioCtx.createBufferSource();
+    source.buffer = buffer;
+
+    const gain = audioCtx.createGain();
+    gain.gain.setValueAtTime(0.15, now);
+
+    source.connect(gain).connect(audioCtx.destination);
+    source.start(now);
+    source.stop(now + 0.08);
+  }
+
   class Particle {
     constructor() {
       this.x = Math.random() * cssWidth;
@@ -59,7 +82,7 @@ window.addEventListener("DOMContentLoaded", () => {
       this.ignoresMouse = Math.random() < 0.05;
 
       const minSizeRatio = 0.01;
-      const maxSizeRatio = 0.01;
+      const maxSizeRatio = 0.015;
       const base = Math.min(cssWidth, cssHeight);
       const sizePx = base * (minSizeRatio + Math.random() * (maxSizeRatio - minSizeRatio));
       this.radius = sizePx / 2;
@@ -107,31 +130,27 @@ window.addEventListener("DOMContentLoaded", () => {
 
       return dist < 40;
     }
-draw() {
-  const glowRadius = this.radius * 8;
-  const flicker = 0.4 + Math.random() * 0.2; // mehr Helligkeit
 
-  ctx.save();
-  ctx.globalCompositeOperation = "lighter";
+    draw() {
+      const glowRadius = this.radius * 8;
+      const flicker = 0.6 + Math.random() * 0.1;
 
-  const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, glowRadius);
-  gradient.addColorStop(0.0, `rgba(255, 255, 220, ${flicker})`);            // heller Kern
-  gradient.addColorStop(0.15, `rgba(200, 255, 160, ${flicker * 0.9})`);
-  gradient.addColorStop(0.3, `rgba(100, 255, 100, ${flicker * 0.6})`);
-  gradient.addColorStop(0.5, `rgba(60, 200, 60, ${flicker * 0.4})`);
-  gradient.addColorStop(1.0, `rgba(0, 50, 0, 0)`);                          // weicher Rand
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
 
-  ctx.fillStyle = gradient;
-  ctx.beginPath();
-  ctx.arc(this.x, this.y, glowRadius, 0, Math.PI * 2);
-  ctx.fill();
+      const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, glowRadius);
+      gradient.addColorStop(0.05, `rgba(255, 255, 220, ${flicker})`);
+      gradient.addColorStop(0.2, `rgba(200, 255, 140, ${flicker * 0.9})`);
+      gradient.addColorStop(0.4, `rgba(170, 255, 85, ${flicker * 0.6})`);
+      gradient.addColorStop(0.6, `rgba(100, 200, 50, ${flicker * 0.4})`);
+      gradient.addColorStop(1.0, `rgba(0, 40, 0, 0)`);
 
-  ctx.restore();
-}
-
-
-
-
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, glowRadius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
   }
 
   for (let i = 0; i < totalParticles; i++) {
@@ -160,6 +179,9 @@ draw() {
       const color = flackerTimer % 2 === 0 ? "white" : "black";
       ctx.fillStyle = color;
       ctx.fillRect(0, 0, cssWidth, cssHeight);
+
+      if (soundEnabled) playGlitchNoise(); // <– hier wird Störgeräusch abgespielt
+
       flackerTimer++;
       if (flackerTimer > 10) {
         clearInterval(interval);
@@ -178,7 +200,7 @@ draw() {
         const isNear = p.update();
         if (!p.ignoresMouse) {
           activeFlies++;
-          if (mouseAttracted && isNear) reached++; // <-- wichtig!
+          if (mouseAttracted && isNear) reached++;
         }
         p.draw();
       }
@@ -201,12 +223,12 @@ draw() {
 
   animate();
 
-  const soundButton = document.getElementById("soundButton");
-  soundButton.addEventListener("click", () => {
+  const sound_on_button = document.getElementById("sound_on_button");
+  sound_on_button.addEventListener("click", () => {
     audioCtx.resume().then(() => {
       soundEnabled = true;
       mouseAttracted = true;
-      soundButton.style.display = "none";
+      sound_on_button.style.display = "none";
     });
   });
 });

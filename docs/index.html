@@ -10,13 +10,15 @@
 </head>
 <body>
   <div id="iphone-frame">
-    <button id="soundButton">Son activé</button>
+    <button id="sound_on_button">
+      Sound<br><span class="on-text">on</span>
+    </button>
     <canvas id="canvas"></canvas>
   </div>
 
   <!-- GSAP Button Hover Animation -->
   <script>
-    const btn = document.getElementById("soundButton");
+    const btn = document.getElementById("sound_on_button");
     gsap.set(btn, { xPercent: -50, yPercent: -50 });
 
     let center = { x: 0, y: 0 };

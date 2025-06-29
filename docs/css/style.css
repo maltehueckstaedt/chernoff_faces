@@ -29,8 +29,6 @@ html, body {
   overflow: hidden;
   border-radius: 20px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
-
-  /* übernommen aus deiner zusätzlichen CSS */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -43,7 +41,7 @@ html, body {
   font-size: 2.5rem;
   font-weight: bold;
   font-family: 'Share Tech Mono', monospace;
-  text-shadow: 0 0 2px , 0 0 10px rgba(170, 255, 85, 0.4);
+  text-shadow: 0 0 2px, 0 0 10px rgba(170, 255, 85, 0.4);
   position: relative;
   width: 100%;
 }
@@ -70,31 +68,52 @@ html, body {
 }
 
 /* Sound-Button */
-#soundButton {
+#sound_on_button {
   position: absolute;
   top: 50%;
   left: 50%;
   z-index: 10;
-  padding: 20px 40px;
-  font-size: 20px;
+  padding: 20px 10px;
+  padding-top: 28px;
+  font-size: 24px;
+  line-height: 1;
+  text-align: center;
   font-family: 'Playwrite FR Trad', cursive;
   background: transparent;
-  color: white;
+  color: #aaff55;
   cursor: pointer;
-  border: 2px solid white;
+  border: 2px solid #aaff55;
   border-radius: 999px;
-  box-shadow:
-    0 0 6px rgba(255, 255, 255, 0.6),
-    0 0 14px rgba(170, 255, 85, 0.5),
-    0 0 28px rgba(170, 255, 85, 0.35),
-    0 0 60px rgba(255, 255, 200, 0.2),
-    0 0 100px rgba(255, 255, 150, 0.12),
-    inset 0 0 6px rgba(255, 255, 200, 0.3),
-    inset 0 0 12px rgba(170, 255, 85, 0.25),
-    inset 0 0 24px rgba(120, 200, 60, 0.2),
-    inset 0 0 40px rgba(100, 180, 50, 0.1);
-  transition: box-shadow 0.2s ease;
 }
+
+#sound_on_button .on-text {
+  font-size: 24px;
+  display: inline-block;
+  margin-top: -4px;
+}
+
+#sound_on_button::before,
+#sound_on_button::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 2px;
+  height: 8px;
+  background: #aaff55;
+  border-radius: 2px;
+  z-index: 1;
+}
+
+#sound_on_button::before {
+  top: 0;
+  transform: translate(-50%, -100%) translateY(-1px);
+}
+
+#sound_on_button::after {
+  bottom: 0;
+  transform: translate(-50%, 100%) translateY(1px);
+}
+
 
 /* Button-Bereich */
 .bottom-buttons {
@@ -129,6 +148,8 @@ html, body {
   cursor: pointer;
   border-radius: 50%;
   font-family: 'Huninn', monospace;
+  position: relative;
+  overflow: visible;
   transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
@@ -137,39 +158,32 @@ html, body {
   box-shadow: 0 6px 12px rgba(141, 151, 137, 0.4);
 }
 
+/* Vertikale Linien oben/unten */
+.button-wrapper button::before,
+.button-wrapper button::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 3px;
+  height: 8px;
+  background: #aaff55; 
+  z-index: 1;
+}
+
+.button-wrapper button::before {
+  top: 0;
+  transform: translate(-50%, -100%);
+}
+
+.button-wrapper button::after {
+  bottom: 0;
+  transform: translate(-50%, 100%);
+}
+
 /* Button-Label */
 .button-wrapper .label {
   font-size: 0.65rem;
   color: #ffffff;
   font-family: 'Huninn', monospace;
   margin-top: 4px;
-}
-
-button {
-  width: 60px;
-  height: 60px;
-  border: 4px solid #aaff55;
-  border-radius: 50%;
-  background: white;
-  position: relative;
-  font-size: 0; /* Text ausblenden, wenn Symbol rein grafisch sein soll */
-}
-
-button::before,
-button::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 3px;
-  height: 6px;
-  background: #aaff55;
-}
-
-button::before {
-  top: -6px;
-}
-
-button::after {
-  bottom: -6px;
 }
