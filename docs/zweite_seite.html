@@ -1,45 +1,80 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>Zweite Seite</title>
+  <meta charset="UTF-8" />
+  <title>Chernoff Faces</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      background-color: black;
-      height: 100%;
-      width: 100%;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    #iphone-frame {
-      width: 390px;
-      height: 844px;
-      background-color: rgb(224, 164, 164);
-      border-radius: 0px;
-      box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: white;
-      font-family: sans-serif;
-    }
-
-    h1 {
-      font-size: 1.5rem;
-      text-align: center;
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
   <div id="iphone-frame">
-    <h1>Willkommen auf Seite 2!</h1>
+    <div class="container">
+      <div id="chernoff" class="line"></div>
+      <div id="faces" class="line"></div>
+    </div>
+
+    <div class="bottom-buttons">
+      <div class="button-wrapper"><button>汉</button><div class="label">Home</div></div>
+      <div class="button-wrapper"><button>A</button><div class="label">About</div></div>
+      <div class="button-wrapper"><button>V</button><div class="label">View</div></div>
+      <div class="button-wrapper"><button>设</button><div class="label">Settings</div></div>
+      <div class="button-wrapper"><button>M</button><div class="label">Map</div></div>
+      <div class="button-wrapper"><button>P</button><div class="label">Profile</div></div>
+      <div class="button-wrapper"><button>O</button><div class="label">Chat</div></div>
+      <div class="button-wrapper"><button>X</button><div class="label">Camera</div></div>
+    </div>
   </div>
+
+  <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+  <script>
+    const effects = [
+      { y: -100 }, { x: -100 }, { y: 100 }, { x: 100 },
+      { rotation: 720, scale: 0 }, { scale: 0.2 }, { rotation: -360, y: -50 }
+    ];
+
+    function animateText(text, containerId, startDelay = 0) {
+      const container = document.getElementById(containerId);
+      const chars = [];
+      text.split("").forEach((char, i) => {
+        const span = document.createElement("span");
+        span.textContent = char;
+        span.classList.add("char");
+        container.appendChild(span);
+        const effect = effects[i % effects.length];
+        gsap.set(span, effect);
+        gsap.to(span, {
+          opacity: 1,
+          x: 0, y: 0, scale: 1, rotation: 0,
+          delay: startDelay + Math.random() * 1.2,
+          duration: 0.8,
+          ease: "power3.out",
+          onComplete: () => {
+            chars.push(span);
+            if (chars.length === text.length && containerId === "faces") startGlitch();
+          }
+        });
+      });
+    }
+
+    function startGlitch() {
+      gsap.timeline({ repeat: -1, repeatDelay: 2 })
+        .to(".container", { opacity: 0.3, duration: 0.05, y: -1 })
+        .to(".container", { opacity: 1, duration: 0.08, y: 1 })
+        .to(".container", { opacity: 0.6, duration: 0.04, x: 2 })
+        .to(".container", { opacity: 1, duration: 0.1, x: 0, y: 0 });
+    }
+
+    animateText("CHERNOFF", "chernoff");
+    animateText("FACES", "faces", 0.2);
+
+    gsap.from(".button-wrapper", {
+      y: 80,
+      opacity: 0,
+      stagger: 0.1,
+      duration: 0.6,
+      ease: "back.out(1.7)"
+    });
+  </script>
 </body>
 </html>

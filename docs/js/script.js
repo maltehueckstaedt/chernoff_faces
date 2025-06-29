@@ -23,6 +23,8 @@ window.addEventListener("DOMContentLoaded", () => {
   const totalParticles = 10;
 
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  let soundEnabled = false;
+  let mouseAttracted = false;
 
   function playClick(intensity = 0) {
     const now = audioCtx.currentTime;
@@ -54,7 +56,7 @@ window.addEventListener("DOMContentLoaded", () => {
       this.vx = 0;
       this.vy = 0;
       this.speed = 1 + Math.random();
-      this.ignoresMouse = Math.random() < 0.15;
+      this.ignoresMouse = Math.random() < 0.05;
 
       const minSizeRatio = 0.01;
       const maxSizeRatio = 0.01;
@@ -68,7 +70,7 @@ window.addEventListener("DOMContentLoaded", () => {
       const dy = mouse.y - this.y;
       const dist = Math.hypot(dx, dy);
 
-      if (this.ignoresMouse && dist > 150) {
+      if (this.ignoresMouse || !mouseAttracted || dist > 300) {
         this.vx += (Math.random() - 0.5) * 0.5;
         this.vy += (Math.random() - 0.5) * 0.5;
       } else {
@@ -105,30 +107,31 @@ window.addEventListener("DOMContentLoaded", () => {
 
       return dist < 40;
     }
+draw() {
+  const glowRadius = this.radius * 8;
+  const flicker = 0.4 + Math.random() * 0.2; // mehr Helligkeit
 
-    draw() {
-      const glowRadius = this.radius * 30;
-      const flicker = 0.15 + Math.random() * 0.05;
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
 
-      ctx.save();
-      ctx.globalCompositeOperation = "lighter";
+  const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, glowRadius);
+  gradient.addColorStop(0.0, `rgba(255, 255, 220, ${flicker})`);            // heller Kern
+  gradient.addColorStop(0.15, `rgba(200, 255, 160, ${flicker * 0.9})`);
+  gradient.addColorStop(0.3, `rgba(100, 255, 100, ${flicker * 0.6})`);
+  gradient.addColorStop(0.5, `rgba(60, 200, 60, ${flicker * 0.4})`);
+  gradient.addColorStop(1.0, `rgba(0, 50, 0, 0)`);                          // weicher Rand
 
-      const gradient = ctx.createRadialGradient(this.x, this.y, this.radius, this.x, this.y, glowRadius);
-      gradient.addColorStop(0.0, `rgba(255, 255, 200, ${flicker})`);
-      gradient.addColorStop(1.0, "rgba(0, 0, 0, 0)");
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.arc(this.x, this.y, glowRadius, 0, Math.PI * 2);
+  ctx.fill();
 
-      ctx.fillStyle = gradient;
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, glowRadius, 0, Math.PI * 2);
-      ctx.fill();
+  ctx.restore();
+}
 
-      ctx.restore();
 
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle = "white";
-      ctx.fill();
-    }
+
+
   }
 
   for (let i = 0; i < totalParticles; i++) {
@@ -175,19 +178,19 @@ window.addEventListener("DOMContentLoaded", () => {
         const isNear = p.update();
         if (!p.ignoresMouse) {
           activeFlies++;
-          if (isNear) reached++;
+          if (mouseAttracted && isNear) reached++; // <-- wichtig!
         }
         p.draw();
       }
 
-      // Geigerzähler-Sound
-      const chance = reached > 0 ? Math.max(0.1, reached / totalParticles) : 0;
-
-      if (Math.random() < chance) {
-        playClick(chance);
+      if (soundEnabled) {
+        const chance = reached > 0 ? Math.max(0.1, reached / totalParticles) : 0;
+        if (Math.random() < chance) {
+          playClick(chance);
+        }
       }
 
-      if (reached >= activeFlies * 0.95) {
+      if (mouseAttracted && reached >= activeFlies * 0.9) {
         flackernd = true;
         flackernUndWeiter();
       } else {
@@ -196,11 +199,14 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  animate();
+
   const soundButton = document.getElementById("soundButton");
   soundButton.addEventListener("click", () => {
     audioCtx.resume().then(() => {
+      soundEnabled = true;
+      mouseAttracted = true;
       soundButton.style.display = "none";
-      animate();
     });
   });
 });

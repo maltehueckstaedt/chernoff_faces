@@ -5,62 +5,8 @@
   <title>Geiger-Partikel</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Playwrite+FR+Trad&display=swap" rel="stylesheet">
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      background-color: black;
-      height: 100%;
-      width: 100%;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #iphone-frame {
-      width: 390px;
-      height: 844px;
-      position: relative;
-      background-color: black;
-      box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 1;
-    }
-
-    #soundButton {
-      z-index: 10;
-      padding: 20px 40px;
-      font-size: 20px;
-      font-family: 'Playwrite FR Trad', cursive;
-      background: transparent;
-      color: white;
-      cursor: pointer;
-      border: 2px solid white;
-      border-radius: 999px;
-      box-shadow:
-        0 0 4px white,
-        0 0 10px rgba(255, 255, 200, 0.6),
-        0 0 25px rgba(255, 255, 180, 0.5),
-        0 0 45px rgba(255, 230, 150, 0.3),
-        inset 0 0 8px white,
-        inset 0 0 16px rgba(255, 255, 200, 0.6),
-        inset 0 0 30px rgba(255, 240, 180, 0.4);
-      transition: box-shadow 0.05s ease;
-    }
-  </style>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 <body>
   <div id="iphone-frame">
@@ -68,32 +14,50 @@
     <canvas id="canvas"></canvas>
   </div>
 
-<script>
-  const button = document.getElementById('soundButton');
-  let t = 0;
+  <!-- GSAP Button Hover Animation -->
+  <script>
+    const btn = document.getElementById("soundButton");
+    gsap.set(btn, { xPercent: -50, yPercent: -50 });
 
-  function animateGlow() {
-    const f = 0.4 + 0.6 * Math.sin(t); // Pulswert 0.4–1.0
+    let center = { x: 0, y: 0 };
+    let active = false;
 
-    // Mehrschichtiger Glow
-    button.style.boxShadow = `
-      0 0 8px rgba(255, 255, 255, ${f * 0.8}),        /* Kernlicht */
-      0 0 20px rgba(255, 255, 180, ${f * 0.6}),
-      0 0 40px rgba(255, 240, 160, ${f * 0.4}),
-      0 0 80px rgba(255, 220, 130, ${f * 0.2}),
-      inset 0 0 10px rgba(255, 255, 200, ${f * 0.5}),
-      inset 0 0 30px rgba(255, 240, 180, ${f * 0.4}),
-      inset 0 0 60px rgba(255, 220, 130, ${f * 0.3})
-    `;
+    function updateCenter() {
+      const rect = btn.getBoundingClientRect();
+      center = {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2
+      };
+    }
 
-    t += 0.015;
-    requestAnimationFrame(animateGlow);
-  }
+    function handleMove(x, y) {
+      const dx = x - center.x;
+      const dy = y - center.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
 
-  animateGlow();
-</script>
+      if (dist < 150) {
+        const moveX = dx * 0.2;
+        const moveY = dy * 0.2;
+        gsap.to(btn, { x: moveX, y: moveY, duration: 0.3, ease: "power2.out" });
+        active = true;
+      } else if (active) {
+        gsap.to(btn, { x: 0, y: 0, duration: 0.4, ease: "power2.out" });
+        active = false;
+      }
+    }
 
+    document.addEventListener("mousemove", (e) => handleMove(e.clientX, e.clientY));
+    document.addEventListener("touchmove", (e) => {
+      if (e.touches.length > 0) {
+        handleMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    });
 
-  <script src="script.js"></script>
+    window.addEventListener("resize", updateCenter);
+    updateCenter();
+  </script>
+
+  <!-- Main Particle + Sound Logic -->
+  <script src="js/script.js"></script>
 </body>
 </html>

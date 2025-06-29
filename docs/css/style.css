@@ -1,0 +1,146 @@
+/* Grundlayout */
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: rgb(25, 25, 25);
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+/* Schriftart lokal */
+@font-face {
+  font-family: 'Huninn';
+  src: url('../fonts/Huninn-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* iPhone-Frame */
+#iphone-frame {
+  width: 390px;
+  height: 844px;
+  position: relative;
+  background-color: black;
+  overflow: hidden;
+  border-radius: 20px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+
+  /* übernommen aus deiner zusätzlichen CSS */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Animation-Container */
+.container {
+  text-align: center;
+  color: #aaff55;
+  font-size: 2.5rem;
+  font-weight: bold;
+  font-family: 'Share Tech Mono', monospace;
+  text-shadow: 0 0 2px , 0 0 10px rgba(170, 255, 85, 0.4);
+  position: relative;
+  width: 100%;
+}
+
+/* Zeilen */
+.line {
+  white-space: nowrap;
+  height: 1em;
+}
+
+/* Zeichen */
+.char {
+  display: inline-block;
+  opacity: 0;
+}
+
+/* Positionierungen */
+#chernoff,
+#faces {
+  position: static;
+  transform: none;
+  display: block;
+  margin: 0.2em 0;
+}
+
+/* Sound-Button */
+#soundButton {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 10;
+  padding: 20px 40px;
+  font-size: 20px;
+  font-family: 'Playwrite FR Trad', cursive;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  border: 2px solid white;
+  border-radius: 999px;
+  box-shadow:
+    0 0 6px rgba(255, 255, 255, 0.6),
+    0 0 14px rgba(170, 255, 85, 0.5),
+    0 0 28px rgba(170, 255, 85, 0.35),
+    0 0 60px rgba(255, 255, 200, 0.2),
+    0 0 100px rgba(255, 255, 150, 0.12),
+    inset 0 0 6px rgba(255, 255, 200, 0.3),
+    inset 0 0 12px rgba(170, 255, 85, 0.25),
+    inset 0 0 24px rgba(120, 200, 60, 0.2),
+    inset 0 0 40px rgba(100, 180, 50, 0.1);
+  transition: box-shadow 0.2s ease;
+}
+
+/* Button-Bereich */
+.bottom-buttons {
+  position: absolute;
+  bottom: 24px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  column-gap: 16px;
+  row-gap: 12px;
+  justify-content: center;
+  z-index: 10;
+  padding: 0 12px;
+}
+
+/* Einzelner Button */
+.button-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Button-Stil */
+.button-wrapper button {
+  background: transparent;
+  color: #aaff55;
+  border: 2px solid #aaff55;
+  width: 48px;
+  height: 48px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  border-radius: 50%;
+  font-family: 'Huninn', monospace;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.button-wrapper button:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 6px 12px rgba(255, 0, 85, 0.4);
+}
+
+/* Button-Label */
+.button-wrapper .label {
+  font-size: 0.65rem;
+  color: #ffffff;
+  font-family: 'Huninn', monospace;
+  margin-top: 4px;
+}
