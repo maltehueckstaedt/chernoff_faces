@@ -31,9 +31,7 @@ html, body {
   width: 390px;
   height: 704px;
   position: relative;
-  top: 1%;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 1%; 
   background-color: black;
   overflow: hidden;
   border-radius: 20px;
