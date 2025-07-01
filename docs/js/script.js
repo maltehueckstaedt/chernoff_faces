@@ -2,8 +2,8 @@ window.addEventListener("DOMContentLoaded", () => {
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
 
-  const cssWidth = 380;
-  const cssHeight = 714;
+  const cssWidth = 383;
+  const cssHeight = 634;
   let width, height;
 
   function resizeCanvas() {
@@ -190,8 +190,21 @@ window.addEventListener("DOMContentLoaded", () => {
   function flackernUndWeiter() {
     const interval = setInterval(() => {
       const color = flackerTimer % 2 === 0 ? "white" : "black";
+
+      // Clip auf runde Form
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(20, 1);
+      ctx.arcTo(cssWidth - 1, 1, cssWidth - 1, cssHeight - 1, 20);
+      ctx.arcTo(cssWidth - 1, cssHeight - 1, 1, cssHeight - 1, 20);
+      ctx.arcTo(1, cssHeight - 1, 1, 1, 20);
+      ctx.arcTo(1, 1, cssWidth - 1, 1, 20);
+      ctx.closePath();
+      ctx.clip();
+
       ctx.fillStyle = color;
       ctx.fillRect(0, 0, cssWidth, cssHeight);
+      ctx.restore();
 
       if (soundEnabled) playGlitchNoise();
 
