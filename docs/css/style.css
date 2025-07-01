@@ -246,9 +246,10 @@ html, body {
 
 #sun-button {
   position: absolute;
-  bottom: 230px;
-  left: 20px;
+  top: 240px; /* vorher: bottom */
+  left: 50px;
   width: 80px;
+  transform: scale(1.5);
   height: 80px;
   z-index: 999;
   cursor: pointer;
@@ -266,6 +267,7 @@ html, body {
   transform: translate(-50%, -50%);
   color: white;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 20px;
+  font-size: 40px; /* nach Wunsch anpassen */
+  line-height: 1;
   pointer-events: none;
 }
