@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <title>Chernoff Faces</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
+
 </head>
 <body>
   <div id="iphone-frame">
@@ -18,10 +18,10 @@
 
     <div id="sun-button">
       <svg id="sun-shape" width="80" height="80" viewBox="0 0 138.89 138.89">
-        <path id="sun-path" fill="#e30613"
+        <path id="sun-path" fill="#ff6955"
           d="M69.44,0 L78.27,13.71 L90.9,3.4 L95.06,19.17 L110.26,13.26 L109.34,29.54 L125.63,28.63 L119.72,43.83 L135.49,47.98 L125.18,60.62 L138.89,69.44 L125.18,78.27 L135.49,90.9 L119.72,95.06 L125.63,110.26 L109.34,109.34 L110.26,125.63 L95.06,119.72 L90.9,135.49 L78.27,125.18 L69.44,138.89 L60.62,125.18 L47.98,135.49 L43.83,119.72 L28.63,125.63 L29.54,109.34 L13.26,110.26 L19.17,95.06 L3.4,90.9 L13.71,78.27 L0,69.44 L13.71,60.62 L3.4,47.98 L19.17,43.83 L13.26,28.63 L29.54,29.54 L28.63,13.26 L43.83,19.17 L47.98,3.4 L60.62,13.71 L69.44,0 Z" />
       </svg>
-      <div id="sun-label">M</div>
+      <div id="sun-label"></div>
     </div>
 
     <div class="bottom-buttons">
@@ -37,105 +37,7 @@
   </div>
 
   <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
-<script>
-  const effects = [
-    { y: -100 }, { x: -100 }, { y: 100 }, { x: 100 },
-    { rotation: 720, scale: 0 }, { scale: 0.2 }, { rotation: -360, y: -50 }
-  ];
+  <script src="js/landing_page.js"></script>
 
-  function animateText(text, containerId, startDelay = 0) {
-    const container = document.getElementById(containerId);
-    const chars = [];
-    text.split("").forEach((char, i) => {
-      const span = document.createElement("span");
-      span.textContent = char;
-      span.classList.add("char");
-      container.appendChild(span);
-      const effect = effects[i % effects.length];
-      gsap.set(span, effect);
-      gsap.to(span, {
-        opacity: 1,
-        x: 0, y: 0, scale: 1, rotation: 0,
-        delay: startDelay + Math.random() * 1.2,
-        duration: 0.8,
-        ease: "power3.out",
-        onComplete: () => {
-          chars.push(span);
-          if (chars.length === text.length && containerId === "faces") startGlitch();
-        }
-      });
-    });
-  }
-
-  function startGlitch() {
-    gsap.timeline({ repeat: -1, repeatDelay: 2 })
-      .to(".container", { opacity: 0.3, duration: 0.05, y: -1 })
-      .to(".container", { opacity: 1, duration: 0.08, y: 1 })
-      .to(".container", { opacity: 0.6, duration: 0.04, x: 2 })
-      .to(".container", { opacity: 1, duration: 0.1, x: 0, y: 0 });
-  }
-
-  animateText("CHERNOFF", "chernoff");
-  animateText("FACES", "faces", 0.2);
-
-  // Initialzustand: Menü versteckt
-  gsap.set(".bottom-buttons", {
-    y: 80,
-    opacity: 0
-  });
-  const menuVisible = { state: false };
-
-  // Menü-Button Funktion
-  document.getElementById("sun-button").addEventListener("click", () => {
-    if (menuVisible.state) {
-      gsap.to(".bottom-buttons", {
-        y: 80,
-        opacity: 0,
-        duration: 0.4,
-        ease: "back.in(1.7)"
-      });
-    } else {
-      gsap.to(".bottom-buttons", {
-        y: 0,
-        opacity: 1,
-        duration: 0.6,
-        ease: "back.out(1.7)"
-      });
-    }
-    menuVisible.state = !menuVisible.state;
-  });
-
-  // Drehende Sonne
-  gsap.to("#sun-shape", {
-    rotation: 360,
-    duration: 8,
-    repeat: -1,
-    ease: "linear",
-    transformOrigin: "50% 50%"
-  });
-
-function randomJump() {
-  const framePaddingX = 1; // wegen #inner-outline Position
-  const framePaddingY = 1;
-
-  const maxX = 80 - 80; // #inner-outline width - sun-button width
-  const maxY = 34 - 80;
-
-  const x = gsap.utils.random(framePaddingX, maxX);
-  const y = gsap.utils.random(framePaddingY, maxY);
-  const delay = gsap.utils.random(0.5, 2.5);
-
-  gsap.to("#sun-button", {
-    x: x,
-    y: y,
-    duration: 0.2,
-    ease: "power1.inOut",
-    delay: delay,
-    onComplete: randomJump
-  });
-}
-
-randomJump();
-</script>
 </body>
 </html>

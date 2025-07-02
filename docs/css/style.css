@@ -19,17 +19,53 @@ html, body {
 ========================================= */
 @font-face {
   font-family: 'Huninn';
-  src: url('../fonts/Huninn-Regular.ttf') format('truetype');
+  src: url('.../fonts/Huninn-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'Brayden';
+  src: url('.../fonts/BraydenScriptRegular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'AftermathCondensedBold';
+  src: url('../fonts/Aftermath Condensed Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'StrassburgFraktur';
+  src: url('../fonts/strassburg fraktur.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'TannenbergFett';
+  src: url('../fonts/TannenbergFett.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'PopRumKiwi-Telop';
+  src: url('../fonts/PopRumKiwi-Telop.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
 /* =========================================
    iPhone-Frame mit innerem Rahmen
 ========================================= */
 #iphone-frame {
-  width: 390px;
-  height: 704px;
+  width: 100vw;
+  height: calc(100vw * (670 / 390));
+  max-width: 390px;
+  max-height: 670px;
   position: relative;
   top: 1%; 
   background-color: black;
@@ -41,13 +77,12 @@ html, body {
   justify-content: center;
   padding-bottom: env(safe-area-inset-bottom);
 }
-
 #inner-outline {
   position: absolute;
-  top: 1px;
-  left: 1px;
-  width: 380px;
-  height: 634px;
+  top: 1.4%;
+  left: 2.5%;
+  width: 95%;
+  height: 97%;
   border-radius: 20px;
   border: 2px solid #aaff55;
   pointer-events: none;
@@ -144,7 +179,7 @@ html, body {
 ========================================= */
 .bottom-buttons {
   position: absolute;
-  bottom: calc(84px + env(safe-area-inset-bottom));
+  bottom: calc(44px + env(safe-area-inset-bottom));
   width: 100%;
   display: grid;
   grid-template-columns: repeat(4, auto);
@@ -173,16 +208,12 @@ html, body {
   font-size: 1.2rem;
   cursor: pointer;
   border-radius: 50%;
-  font-family: 'Huninn', monospace;
+  font-family: 'PopRumKiwi-Telop', monospace;
   position: relative;
   overflow: visible;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
-.button-wrapper button:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 6px 12px rgba(141, 151, 137, 0.4);
-}
 
 /* Vertikale Linien oben und unten */
 .button-wrapper button::before,
@@ -210,7 +241,7 @@ html, body {
 .button-wrapper .label {
   font-size: 0.65rem;
   color: #ffffff;
-  font-family: 'Huninn', monospace;
+  font-family: 'AftermathCondensedBold', monospace;
   margin-top: 4px;
 }
 
@@ -264,8 +295,25 @@ html, body {
   left: 50%;
   transform: translate(-50%, -50%);
   color: white;
-  font-family: 'Share Tech Mono', monospace;
   font-size: 40px; /* nach Wunsch anpassen */
   line-height: 1;
   pointer-events: none;
 }
+
+#sun-label {
+  font-size: 18px;
+  display: flex;
+  flex-direction: column; /* <--- das fehlt */
+  justify-content: center;
+  gap: 0px;
+  margin-top: 3px;
+}
+
+.menu-letter {
+  display: inline-block; 
+}
+
+#sun-label .menu-letter {
+  letter-spacing: 1px; /* z. B. 2px, anpassbar */
+}
+
