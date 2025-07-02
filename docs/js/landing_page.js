@@ -236,19 +236,48 @@ buttons.forEach(button => {
     });
   });
 
-  button.addEventListener('mouseleave', () => {
-    if (rotationTween) {
-      rotationTween.kill();
-      rotationTween = null;
-    }
+button.addEventListener('mouseleave', () => {
+  if (rotationTween) {
+    rotationTween.kill();
+    rotationTween = null;
+  }
 
-    // Farbe zurücksetzen
-    gsap.to(button, {
-      backgroundColor: 'transparent',
-      color: '#aaff55',
-      duration: 0.2,
-      ease: 'power1.in'
-    });
+  // Rotation sanft zurücksetzen
+  gsap.to(button, {
+    rotation: 0,
+    duration: 0.6,
+    ease: 'power2.out'
+  });
+
+  // Farbe zurücksetzen
+  gsap.to(button, {
+    backgroundColor: 'transparent',
+    color: '#aaff55',
+    duration: 0.2,
+    ease: 'power1.in'
   });
 });
+
+});
+
+const sunButton = document.getElementById('sun-button');
+const sunShape = document.querySelector('#sun-shape path');
+
+sunButton.addEventListener('mouseenter', () => {
+  gsap.to(sunShape, {
+    fill: 'rgb(255, 176, 102)',
+    duration: 0.2,
+    ease: 'power1.out'
+  });
+});
+
+sunButton.addEventListener('mouseleave', () => {
+  gsap.to(sunShape, {
+    fill: '#ff6955', // ursprüngliche Farbe
+    duration: 0.2,
+    ease: 'power1.in'
+  });
+});
+
+
 
