@@ -317,3 +317,11 @@ html, body {
   letter-spacing: 1px; /* z. B. 2px, anpassbar */
 }
 
+.button-char {
+  display: block;
+  transform: rotate(0deg);
+  pointer-events: none;
+}
+.button-wrapper button {
+  position: relative;
+}

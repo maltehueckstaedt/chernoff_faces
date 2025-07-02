@@ -212,22 +212,25 @@ cycleText();
 const buttons = document.querySelectorAll('.button-wrapper button');
 
 buttons.forEach(button => {
+  const char = button.querySelector('.button-char');
   let rotationTween = null;
 
   button.addEventListener('mouseenter', () => {
-    // Kill alte Rotation
     if (rotationTween) rotationTween.kill();
 
-    // Start Rotation
     rotationTween = gsap.to(button, {
       rotation: '+=360',
       duration: 2,
       repeat: -1,
       ease: 'linear',
-      transformOrigin: '50% 50%'
+      transformOrigin: '50% 50%',
+      onUpdate: () => {
+        // Gegenrotation für Buchstaben
+        const currentRotation = gsap.getProperty(button, 'rotation');
+        gsap.set(char, { rotation: -currentRotation });
+      }
     });
 
-    // Farbe füllen und Text schwarz
     gsap.to(button, {
       backgroundColor: '#aaff55',
       color: '#000000',
@@ -236,29 +239,32 @@ buttons.forEach(button => {
     });
   });
 
-button.addEventListener('mouseleave', () => {
-  if (rotationTween) {
-    rotationTween.kill();
-    rotationTween = null;
-  }
+  button.addEventListener('mouseleave', () => {
+    if (rotationTween) {
+      rotationTween.kill();
+      rotationTween = null;
+    }
 
-  // Rotation sanft zurücksetzen
-  gsap.to(button, {
-    rotation: 0,
-    duration: 0.6,
-    ease: 'power2.out'
-  });
+    gsap.to(button, {
+      rotation: 0,
+      duration: 0.6,
+      ease: 'power2.out',
+      onUpdate: () => {
+        const currentRotation = gsap.getProperty(button, 'rotation');
+        gsap.set(char, { rotation: -currentRotation });
+      }
+    });
 
-  // Farbe zurücksetzen
-  gsap.to(button, {
-    backgroundColor: 'transparent',
-    color: '#aaff55',
-    duration: 0.2,
-    ease: 'power1.in'
+    gsap.to(button, {
+      backgroundColor: 'transparent',
+      color: '#aaff55',
+      duration: 0.2,
+      ease: 'power1.in'
+    });
   });
 });
 
-});
+
 
 const sunButton = document.getElementById('sun-button');
 const sunShape = document.querySelector('#sun-shape path');
