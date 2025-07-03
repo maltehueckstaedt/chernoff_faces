@@ -141,6 +141,7 @@ function renderLabel(text) {
       span.style.fontFamily = fonts[0]; // Standard: Aftermath
       span.style.fontSize = '18px';
       lineDiv.appendChild(span);
+      
     });
 
     sunLabel.appendChild(lineDiv);
@@ -255,13 +256,17 @@ buttons.forEach(button => {
       }
     });
 
-    gsap.to(button, {
-      backgroundColor: 'transparent',
-      color: '#aaff55',
-      duration: 0.2,
-      ease: 'power1.in'
-    });
+    // Nur zurücksetzen, wenn es NICHT der about-button ist
+    if (button.id !== 'about-button') {
+      gsap.to(button, {
+        backgroundColor: 'transparent',
+        color: '#aaff55',
+        duration: 0.2,
+        ease: 'power1.in'
+      });
+    }
   });
+
 });
 
 
@@ -271,7 +276,7 @@ const sunShape = document.querySelector('#sun-shape path');
 
 sunButton.addEventListener('mouseenter', () => {
   gsap.to(sunShape, {
-    fill: 'rgb(255, 176, 102)',
+    fill: '#aaff55',
     duration: 0.2,
     ease: 'power1.out'
   });
@@ -286,4 +291,73 @@ sunButton.addEventListener('mouseleave', () => {
 });
 
 
+const aboutBtn = document.getElementById("about-button");
+const aboutChar = aboutBtn.querySelector(".button-char");
 
+aboutBtn.addEventListener("click", () => {
+  // Button dauerhaft gelb & hervorgehoben
+  gsap.set(aboutBtn, {
+    backgroundColor: "#aaff55",
+    color: "#000000",
+    zIndex: 9999,
+    position: "absolute",
+    pointerEvents: "none"
+  });
+
+  gsap.set(aboutChar, { color: "#000000" });
+
+  // Eltern-Wrapper und Label referenzieren
+  const aboutWrapper = aboutBtn.closest(".button-wrapper");
+  const aboutLabel = aboutWrapper.querySelector(".label");
+
+  // Alle anderen Elemente ausblenden
+  const elementsToFade = Array.from(document.querySelectorAll("#iphone-frame .button-wrapper, #chernoff, #faces, #sun-button, #sun-label, #inner-outline"))
+    .filter(el => el !== aboutWrapper);
+
+  gsap.to(elementsToFade, {
+    opacity: 0,
+    pointerEvents: "none",
+    duration: 0.5,
+    ease: "power1.out"
+  });
+
+  // Auch das Label vom About-Button selbst ausblenden
+  if (aboutLabel) {
+    gsap.to(aboutLabel, {
+      opacity: 0,
+      duration: 0.3,
+      ease: "power1.out"
+    });
+  }
+
+  // Button in die Mitte bewegen
+  const rect = aboutBtn.getBoundingClientRect();
+  const targetX = window.innerWidth / 2 - rect.left - rect.width / 2;
+  const targetY = window.innerHeight / 2 - rect.top - rect.height / 2;
+
+  gsap.to(aboutBtn, {
+    x: targetX,
+    y: targetY,
+    duration: 0.6,
+    ease: "power2.out",
+    onComplete: () => {
+      // A vorher ausblenden
+      gsap.to(aboutChar, {
+        opacity: 0,
+        duration: 0.3,
+        ease: "sine.inOut"
+      });
+
+      // Dann Button vergrößern
+      gsap.to(aboutBtn, {
+        scale: 40,
+        duration: 1.0,
+        ease: "power2.inOut",
+        delay: 0.1,
+        onComplete: () => {
+          window.location.href = "about.html";
+        }
+      });
+    }
+  });
+});

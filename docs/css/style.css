@@ -77,6 +77,24 @@ html, body {
   justify-content: center;
   padding-bottom: env(safe-area-inset-bottom);
 }
+
+#iphone-frame-green {
+  width: 100vw;
+  height: calc(100vw * (670 / 390));
+  max-width: 390px;
+  max-height: 670px;
+  position: relative;
+  top: 1%; 
+  background-color: #aaff55;
+  overflow: hidden;
+  border-radius: 20px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 #inner-outline {
   position: absolute;
   top: 1.4%;
@@ -317,11 +335,54 @@ html, body {
   letter-spacing: 1px; /* z. B. 2px, anpassbar */
 }
 
-.button-char {
-  display: block;
-  transform: rotate(0deg);
-  pointer-events: none;
-}
-.button-wrapper button {
+.button-wrapper {
   position: relative;
+}
+.button-char {
+  display: inline-block;
+  position: relative;
+}
+
+
+#scroll-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+  padding: 60px 24px;
+  box-sizing: border-box;
+  z-index: 2;
+}
+
+/* Apple-ähnliche große Typo + initialer Zustand für Animation */
+.text-block {
+  font-family: 'Huninn', sans-serif;
+  opacity: 0;
+  transform: translateY(60px);
+  font-size: 2rem;
+  line-height: 1.4;
+  font-weight: normal;
+  color: #000;
+  margin-bottom: 100px;
+  will-change: opacity, transform;
+}
+
+
+#scroll-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+  padding: 60px 24px;
+  box-sizing: border-box;
+  z-index: 2;
+
+  /* Scrollbar ausblenden (cross-browser) */
+  scrollbar-width: none;       /* Firefox */
+  -ms-overflow-style: none;    /* IE/Edge */
+}
+#scroll-container::-webkit-scrollbar {
+  display: none;               /* Chrome/Safari */
 }

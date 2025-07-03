@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Scroll Reveal im iPhone-Frame</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="iphone-frame-green">
+    <div id="inner-outline"></div>
+    <div id="scroll-container">
+      <section class="text-block">What Are the Chernoff Faces?</section>
+      <section class="text-block">Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</section>
+      <section class="text-block">Ut enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrudUt enim ad minim veniam, quis nostrud exercitation ullamco laboris.</section>
+      <section class="text-block">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum.</section>
+      <section class="text-block">Excepteur sint occaecat cupidatat non proident.</section>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+  <script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    gsap.utils.toArray(".text-block").forEach(section => {
+      gsap.to(section, {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: section,
+          start: "top 80%",
+          scroller: "#scroll-container"
+        }
+      });
+    });
+  </script>
+</body>
+</html>
