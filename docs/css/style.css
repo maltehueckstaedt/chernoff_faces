@@ -293,39 +293,40 @@ html, body {
 
 #sun-button {
   position: absolute;
-  top: 240px; /* vorher: bottom */
+  top: 240px;
   left: 50px;
   width: 80px;
-  transform: scale(1.5);
   height: 80px;
   z-index: 999;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #sun-shape {
   width: 100%;
   height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 #sun-label {
   position: absolute;
   top: 50%;
-  left: 50%;
+  left: 50%; 
   transform: translate(-50%, -50%);
-  color: rgb(255, 255, 255);
-  font-size: 18px;
+  color: white;
   line-height: 1;
   pointer-events: none;
   display: flex;
   flex-direction: column;
-  align-items: center; /* zentriert den Text horizontal */
+  align-items: center;
   justify-content: center;
-  gap: 0px;
   text-align: center;
 }
-#sun-label > div:first-child {
-  margin-top: 4px; /* oder z. B. transform: translateY(4px); */
-}
+
 
 .menu-letter {
   display: inline-block; 

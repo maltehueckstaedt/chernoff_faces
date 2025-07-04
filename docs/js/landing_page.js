@@ -4,8 +4,7 @@
 
 const effects = [
   { y: -100 }, { x: -100 }, { y: 100 }, { x: 100 },
-  { rotation: 720, scale: 0 },
-  { scale: 0.2 },
+  { rotation: 720, scale: 0 }, { scale: 0.2 },
   { rotation: -360, y: -50 }
 ];
 
@@ -19,9 +18,7 @@ function animateText(text, containerId, startDelay = 0) {
     span.classList.add("char");
     container.appendChild(span);
 
-    const effect = effects[i % effects.length];
-    gsap.set(span, effect);
-
+    gsap.set(span, effects[i % effects.length]);
     gsap.to(span, {
       opacity: 1,
       x: 0, y: 0, scale: 1, rotation: 0,
@@ -52,7 +49,6 @@ animateText("FACES", "faces", 0.2);
 // -----------------------------
 
 gsap.set(".button-wrapper", { y: 50, opacity: 0 });
-
 const menuVisible = { state: false };
 
 document.getElementById("sun-button").addEventListener("click", () => {
@@ -81,7 +77,7 @@ document.getElementById("sun-button").addEventListener("click", () => {
 });
 
 // -----------------------------
-// SUN BUTTON: ENDLOSROTATION
+// SUN BUTTON: ROTATION + JUMP
 // -----------------------------
 
 gsap.to("#sun-shape", {
@@ -92,44 +88,32 @@ gsap.to("#sun-shape", {
   transformOrigin: "50% 50%"
 });
 
-// -----------------------------
-// SUN BUTTON: SPRUNGBEWEGUNG
-// -----------------------------
-
 function randomJump() {
   const x = gsap.utils.random(-20, -10);
   const y = gsap.utils.random(-30, -10);
   const delay = gsap.utils.random(0.5, 2.5);
 
   gsap.to("#sun-button", {
-    x,
-    y,
+    x, y,
     duration: 0.2,
     ease: "power1.inOut",
     delay,
     onComplete: randomJump
   });
 }
-
 randomJump();
 
 // -----------------------------
 // DYNAMISCHER LABEL-TEXT
 // -----------------------------
 
-const fonts = [
-  "'PopRumKiwi-Telop', sans-serif",
-  "'TannenbergFett'"
-];
-
+const fonts = ["'PopRumKiwi-Telop', sans-serif", "'TannenbergFett'"];
 const words = ["Open\nMenu", "x", "Click\nHere"];
 const sunLabel = document.getElementById("sun-label");
 
 function renderLabel(text) {
   sunLabel.innerHTML = "";
-  const lines = text.split("\n");
-
-  lines.forEach(line => {
+  text.split("\n").forEach(line => {
     const lineDiv = document.createElement("div");
     lineDiv.style.display = "flex";
     lineDiv.style.justifyContent = "center";
@@ -138,10 +122,9 @@ function renderLabel(text) {
       const span = document.createElement("span");
       span.classList.add("menu-letter");
       span.textContent = char;
-      span.style.fontFamily = fonts[0]; // Standard: Aftermath
-      span.style.fontSize = '18px';
+      span.style.fontFamily = fonts[0];
+      span.style.fontSize = "18px";
       lineDiv.appendChild(span);
-      
     });
 
     sunLabel.appendChild(lineDiv);
@@ -151,27 +134,14 @@ function renderLabel(text) {
 }
 
 function applyAnimation() {
-  const lines = sunLabel.querySelectorAll("div");
+  sunLabel.querySelectorAll("div").forEach(line => {
+    Array.from(line.children).forEach(letter => {
+      const useFraktur = Math.random() < 0.4;
+      letter.style.fontFamily = useFraktur ? fonts[1] : fonts[0];
+      letter.style.fontSize = useFraktur ? "35px" : "28px";
+      letter.style.top = useFraktur ? "-5px" : "0px";
+      letter.style.position = "relative";
 
-  lines.forEach(line => {
-    const letters = Array.from(line.children);
-    if (letters.length === 0) return;
-
-    letters.forEach(letter => {
-      // Zufällig Tannenberg oder Standard-Font
-      const useFraktur = Math.random() < 0.4; // z. B. 40 % Fraktur
-      if (useFraktur) {
-        letter.style.fontFamily = fonts[1]; // Tannenberg
-        letter.style.fontSize = '25px';
-        letter.style.position = 'relative';
-        letter.style.top = '-5px'; // optisch angleichen
-      } else {
-        letter.style.fontFamily = fonts[0]; // Aftermath
-        letter.style.fontSize = '18px';
-        letter.style.top = '0px';
-      }
-
-      // Buchstaben leicht vibrieren
       function animateLetter() {
         gsap.to(letter, {
           x: gsap.utils.random(-0.1, 0.1),
@@ -185,13 +155,7 @@ function applyAnimation() {
   });
 }
 
-
-// -----------------------------
-// TEXTWECHSEL IM SONNENLABEL
-// -----------------------------
-
 let currentWord = "Menu";
-
 function cycleText() {
   let next;
   do {
@@ -207,12 +171,10 @@ renderLabel("Menu");
 cycleText();
 
 // -----------------------------
-// BUTTON-HOVER: ENDLOSROTATION NUR FÜR BUTTONS
+// BUTTON-HOVER: ROTATION
 // -----------------------------
 
-const buttons = document.querySelectorAll('.button-wrapper button');
-
-buttons.forEach(button => {
+document.querySelectorAll('.button-wrapper button').forEach(button => {
   const char = button.querySelector('.button-char');
   let rotationTween = null;
 
@@ -226,7 +188,6 @@ buttons.forEach(button => {
       ease: 'linear',
       transformOrigin: '50% 50%',
       onUpdate: () => {
-        // Gegenrotation für Buchstaben
         const currentRotation = gsap.getProperty(button, 'rotation');
         gsap.set(char, { rotation: -currentRotation });
       }
@@ -256,7 +217,6 @@ buttons.forEach(button => {
       }
     });
 
-    // Nur zurücksetzen, wenn es NICHT der about-button ist
     if (button.id !== 'about-button') {
       gsap.to(button, {
         backgroundColor: 'transparent',
@@ -266,36 +226,56 @@ buttons.forEach(button => {
       });
     }
   });
-
 });
 
-
+// -----------------------------
+// SUN HOVER-EFFEKT
+// -----------------------------
 
 const sunButton = document.getElementById('sun-button');
-const sunShape = document.querySelector('#sun-shape path');
+const sunShape = document.getElementById('sun-shape');
+const sunPath = document.querySelector('#sun-shape path');
+
+gsap.set(sunShape, { scale: 1.5, transformOrigin: '50% 50%' });
 
 sunButton.addEventListener('mouseenter', () => {
+  gsap.to(sunPath, {
+    fill: '#ffd455',
+    duration: 0.2,
+    ease: 'power1.out'
+  });
+
   gsap.to(sunShape, {
-    fill: '#aaff55',
+    scale: 1.7,
     duration: 0.2,
     ease: 'power1.out'
   });
 });
 
 sunButton.addEventListener('mouseleave', () => {
+  gsap.to(sunPath, {
+    fill: '#aaff55',
+    duration: 0.2,
+    ease: 'power1.in'
+  });
+
   gsap.to(sunShape, {
-    fill: '#ff6955', // ursprüngliche Farbe
+    scale: 1.5,
     duration: 0.2,
     ease: 'power1.in'
   });
 });
 
 
+
+// -----------------------------
+// ABOUT BUTTON TRANSITION
+// -----------------------------
+
 const aboutBtn = document.getElementById("about-button");
 const aboutChar = aboutBtn.querySelector(".button-char");
 
 aboutBtn.addEventListener("click", () => {
-  // Button dauerhaft gelb & hervorgehoben
   gsap.set(aboutBtn, {
     backgroundColor: "#aaff55",
     color: "#000000",
@@ -306,11 +286,9 @@ aboutBtn.addEventListener("click", () => {
 
   gsap.set(aboutChar, { color: "#000000" });
 
-  // Eltern-Wrapper und Label referenzieren
   const aboutWrapper = aboutBtn.closest(".button-wrapper");
   const aboutLabel = aboutWrapper.querySelector(".label");
 
-  // Alle anderen Elemente ausblenden
   const elementsToFade = Array.from(document.querySelectorAll("#iphone-frame .button-wrapper, #chernoff, #faces, #sun-button, #sun-label, #inner-outline"))
     .filter(el => el !== aboutWrapper);
 
@@ -321,7 +299,6 @@ aboutBtn.addEventListener("click", () => {
     ease: "power1.out"
   });
 
-  // Auch das Label vom About-Button selbst ausblenden
   if (aboutLabel) {
     gsap.to(aboutLabel, {
       opacity: 0,
@@ -330,7 +307,6 @@ aboutBtn.addEventListener("click", () => {
     });
   }
 
-  // Button in die Mitte bewegen
   const rect = aboutBtn.getBoundingClientRect();
   const targetX = window.innerWidth / 2 - rect.left - rect.width / 2;
   const targetY = window.innerHeight / 2 - rect.top - rect.height / 2;
@@ -341,14 +317,12 @@ aboutBtn.addEventListener("click", () => {
     duration: 0.6,
     ease: "power2.out",
     onComplete: () => {
-      // A vorher ausblenden
       gsap.to(aboutChar, {
         opacity: 0,
         duration: 0.3,
         ease: "sine.inOut"
       });
 
-      // Dann Button vergrößern
       gsap.to(aboutBtn, {
         scale: 40,
         duration: 1.0,
