@@ -66,17 +66,24 @@ html, body {
   height: calc(100vw * (670 / 390));
   max-width: 390px;
   max-height: 670px;
-  position: relative;
+  position: sticky;
   top: 1%; 
   background-color: black;
   overflow: hidden;
   border-radius: 20px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.6); /* grüner Rahmen-Effekt */
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-bottom: env(safe-area-inset-bottom);
+  margin: 0 auto;
 }
+
+canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 
 #iphone-frame-green {
   width: 100vw;
@@ -104,7 +111,7 @@ html, body {
   border-radius: 20px;
   border: 2px solid #aaff55;
   pointer-events: none;
-  z-index: 1;
+  z-index: 5;
 }
 
 /* =========================================
