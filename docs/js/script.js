@@ -211,7 +211,7 @@ window.addEventListener("DOMContentLoaded", () => {
       flackerTimer++;
       if (flackerTimer > 10) {
         clearInterval(interval);
-        window.location.href = "zweite_seite.html";
+        window.location.href = "start_page.html";
       }
     }, 100);
   }

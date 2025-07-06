@@ -1,50 +1,4 @@
 // -----------------------------
-// TEXTANIMATION FÜR HEADLINE
-// -----------------------------
-
-const effects = [
-  { y: -100 }, { x: -100 }, { y: 100 }, { x: 100 },
-  { rotation: 720, scale: 0 }, { scale: 0.2 },
-  { rotation: -360, y: -50 }
-];
-
-function animateText(text, containerId, startDelay = 0) {
-  const container = document.getElementById(containerId);
-  const chars = [];
-
-  text.split("").forEach((char, i) => {
-    const span = document.createElement("span");
-    span.textContent = char;
-    span.classList.add("char");
-    container.appendChild(span);
-
-    gsap.set(span, effects[i % effects.length]);
-    gsap.to(span, {
-      opacity: 1,
-      x: 0, y: 0, scale: 1, rotation: 0,
-      delay: startDelay + Math.random() * 1.2,
-      duration: 0.8,
-      ease: "power3.out",
-      onComplete: () => {
-        chars.push(span);
-        if (chars.length === text.length && containerId === "faces") startGlitch();
-      }
-    });
-  });
-}
-
-function startGlitch() {
-  gsap.timeline({ repeat: -1, repeatDelay: 2 })
-    .to(".container", { opacity: 0.3, duration: 0.05, y: -1 })
-    .to(".container", { opacity: 1, duration: 0.08, y: 1 })
-    .to(".container", { opacity: 0.6, duration: 0.04, x: 2 })
-    .to(".container", { opacity: 1, duration: 0.1, x: 0, y: 0 });
-}
-
-animateText("CHERNOFF", "chernoff");
-animateText("FACES", "faces", 0.2);
-
-// -----------------------------
 // MENÜBUTTON ANIMATIONEN
 // -----------------------------
 
@@ -335,3 +289,5 @@ aboutBtn.addEventListener("click", () => {
     }
   });
 });
+
+ 
