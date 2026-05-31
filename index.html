@@ -8,6 +8,14 @@
 </head>
 <body>
   <canvas class="dust-crosses" aria-hidden="true"></canvas>
+  <div class="target-explainer target-explainer--hidden" aria-live="polite">
+    <div class="target-explainer-bubble">
+      <svg class="target-explainer-shape" aria-hidden="true">
+        <path class="target-explainer-path"></path>
+      </svg>
+      <div class="target-explainer-box"></div>
+    </div>
+  </div>
 
   <!-- HEADER -->
   <header>
@@ -23,11 +31,7 @@
   </header>
 
   <!-- HERO / EXPLAINER -->
-  <main>
-    <div class="hero-copy" aria-live="polite">
-      <p class="hero-copy-text">Select a mark to see where it leads.</p>
-    </div>
-  </main>
+  <main></main>
 
   <!-- FOOTER -->
   <footer>
@@ -38,7 +42,10 @@
 
     <a class="oval" href="contact.html">Contact</a>
 
-    <button class="oval oval-x" aria-label="Close">&times;</button>
+    <div class="footer-logo-stack">
+      <img class="cf-logo" src="cf_logo.svg" alt="Chernoff Faces logo" />
+      <button class="oval oval-x" aria-label="Close">&times;</button>
+    </div>
   </footer>
 
   <script src="docs/js/start_page.js"></script>
