@@ -53,6 +53,21 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;
+}
+
+.dust-crosses {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+header,
+main,
+footer {
+  position: relative;
+  z-index: 1;
 }
 
 h1, h2, h3, h4, h5, h6 {
