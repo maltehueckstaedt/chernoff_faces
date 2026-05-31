@@ -1,33 +1,53 @@
 const canvas = document.querySelector('.dust-crosses');
 const ctx = canvas.getContext('2d');
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-const PARTICLE_COUNT = 35;
-const CROSS_SIZE = 7;
-const CROSS_OPACITY = 0.86;
-const AVOIDANCE_PADDING = 26;
-const AVOIDANCE_FORCE = 0.035;
-const MOUSE_AVOIDANCE_RADIUS = 120;
-const MOUSE_AVOIDANCE_FORCE = 0.18;
-const NEIGHBOR_RADIUS = 72;
-const SEPARATION_RADIUS = 34;
-const SEPARATION_FORCE = 0.075;
-const MIN_START_DISTANCE = 38;
-const ALIGNMENT_FORCE = 0.012;
-const COHESION_FORCE = 0.0008;
-const CLUSTER_LIMIT = 5;
-const CLUSTER_FORCE = 0.018;
-const WANDER_FORCE = 0.012;
-const MIN_SPEED = 0.18;
-const MAX_SPEED = 0.95;
-const OBSTACLE_SELECTOR = 'a, button, .projects-box, .logo-kap, .poch-emblem';
 
-let particles = [];
+const STAR_POINTS = 20;
+const STAR_OUTER_RADIUS = 44;
+const STAR_INNER_RADIUS = 60;
+const STAR_COLOR = '#ff8282';
+const STAR_OPACITY = 1;
+const TARGET_EASING = 0.035;
+const ARRIVAL_DISTANCE = 1.4;
+const TARGET_HOLD_MIN = 95;
+const TARGET_HOLD_MAX = 170;
+const TARGET_OFFSET_X = 18;
+const TARGET_OFFSET_Y = -18;
+const TOP_BUTTON_OFFSET_X = -18;
+const TOP_BUTTON_OFFSET_Y = 30;
+const LOWER_LEFT_TARGETS = ['Chernoff Faces', 'Mother', 'Downer'];
+const MIN_SPIN = -0.555;
+const MAX_SPIN = 0.955;
+const SPIN_CHANGE_FORCE = 0.0025;
+const TEXT_WORDS = ['Click', 'Here!'];
+const TEXT_SWITCH_FRAMES = 86;
+const TEXT_MORPH_FRAMES = 28;
+const TEXT_COLOR = 'red';
+const TEXT_SIZE = 40;
+const TEXT_FONT = 'NineSevenTallPixel';
+const TEXT_MORPH_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!?<>/\\';
+const TEXT_WIGGLE_FREQUENCY = 10;
+const TEXT_WIGGLE_POSITION = 1.6;
+const TEXT_WIGGLE_ROTATION = 0.001;
+const TEXT_WIGGLE_SCALE = 0.001;
+const BUTTON_SELECTOR = '.oval';
+const EXPLAINER_SELECTOR = '.hero-copy-text';
+const EXPLAINER_TEXTS = {
+  'Chernoff Faces': 'Animated marks, loose projects, and strange little interfaces.',
+  Mother: 'Mother gathers current image and sound experiments.',
+  Downer: 'Downer points toward slower, darker project material.',
+  'LOCAL FIST': 'Local Fist is the rough local signal.',
+  Contact: 'For messages, requests, and possible collaborations.',
+  Close: 'A small exit sign with no real exit yet.',
+};
+
 let animationFrame = null;
-let obstacles = [];
-let mouse = { x: 0, y: 0, active: false };
+let buttonTargets = [];
+let explainerText = null;
+let star = createStar();
 
-function getParticleCount() {
-  return PARTICLE_COUNT;
+if (document.fonts) {
+  document.fonts.load(`${TEXT_SIZE}px ${TEXT_FONT}`);
 }
 
 function resizeCanvas() {
@@ -40,232 +60,241 @@ function resizeCanvas() {
   ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
 }
 
-function updateObstacles() {
-  obstacles = Array.from(document.querySelectorAll(OBSTACLE_SELECTOR)).map((element) => {
+function updateButtonTargets() {
+  buttonTargets = Array.from(document.querySelectorAll(BUTTON_SELECTOR)).map((element) => {
     const rect = element.getBoundingClientRect();
+    const margin = Math.max(STAR_OUTER_RADIUS, STAR_INNER_RADIUS);
+    const label = getButtonLabel(element);
+    const useLowerLeft = LOWER_LEFT_TARGETS.includes(label);
+    const targetX = useLowerLeft ? rect.left + TOP_BUTTON_OFFSET_X : rect.right + TARGET_OFFSET_X;
+    const targetY = useLowerLeft ? rect.bottom + TOP_BUTTON_OFFSET_Y : rect.top + TARGET_OFFSET_Y;
 
     return {
-      left: rect.left - AVOIDANCE_PADDING,
-      right: rect.right + AVOIDANCE_PADDING,
-      top: rect.top - AVOIDANCE_PADDING,
-      bottom: rect.bottom + AVOIDANCE_PADDING,
-      centerX: rect.left + rect.width / 2,
-      centerY: rect.top + rect.height / 2,
+      x: clamp(targetX, margin, window.innerWidth - margin),
+      y: clamp(targetY, margin, window.innerHeight - margin),
+      label,
     };
   });
 }
 
-function isInsideObstacle(x, y) {
-  return obstacles.some((obstacle) => (
-    x > obstacle.left &&
-    x < obstacle.right &&
-    y > obstacle.top &&
-    y < obstacle.bottom
-  ));
+function getButtonLabel(element) {
+  const text = element.textContent.replace(/\s+/g, ' ').trim();
+  return text === '×' ? 'Close' : text;
 }
 
-function isTooCloseToParticle(x, y) {
-  return particles.some((particle) => (
-    Math.hypot(particle.x - x, particle.y - y) < MIN_START_DISTANCE
-  ));
-}
-
-function createParticle(randomY = true) {
-  let x = Math.random() * window.innerWidth;
-  let y = randomY ? Math.random() * window.innerHeight : window.innerHeight + CROSS_SIZE;
-
-  for (
-    let attempt = 0;
-    attempt < 80 && (isInsideObstacle(x, y) || isTooCloseToParticle(x, y));
-    attempt += 1
-  ) {
-    x = Math.random() * window.innerWidth;
-    y = randomY ? Math.random() * window.innerHeight : window.innerHeight + CROSS_SIZE;
-  }
+function createStar() {
+  const firstTarget = buttonTargets[0] || {
+    x: window.innerWidth * 0.5,
+    y: window.innerHeight * 0.5,
+  };
 
   return {
-    x,
-    y,
-    size: CROSS_SIZE,
-    speedX: -0.35 + Math.random() * 0.7,
-    speedY: -0.45 + Math.random() * 0.35,
-    rotation: Math.random() * Math.PI,
-    spin: -0.012 + Math.random() * 0.024,
-    opacity: CROSS_OPACITY,
+    x: firstTarget.x,
+    y: firstTarget.y,
+    rotation: Math.random() * Math.PI * 2,
+    spin: -0.025 + Math.random() * 0.05,
+    spinTarget: -0.04 + Math.random() * 0.08,
+    moodTimer: 90,
+    targetIndex: 0,
+    activeLabel: '',
+    holdTimer: 0,
+    textTimer: 0,
   };
 }
 
-function seedParticles() {
-  particles = [];
-
-  for (let i = 0; i < getParticleCount(); i += 1) {
-    particles.push(createParticle());
-  }
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
 }
 
-function drawCross(particle) {
-  ctx.save();
-  ctx.translate(particle.x, particle.y);
-  ctx.rotate(particle.rotation);
-  ctx.globalAlpha = particle.opacity;
-  ctx.strokeStyle = '#111';
-  ctx.lineWidth = Math.max(0.8, particle.size * 0.14);
-  ctx.lineCap = 'round';
+function smoothstep(value) {
+  return value * value * (3 - 2 * value);
+}
 
-  const half = particle.size / 2;
+function seededNoise(seed) {
+  const value = Math.sin(seed * 12.9898) * 43758.5453;
+  return (value - Math.floor(value)) * 2 - 1;
+}
+
+function wiggle(time, frequency, amplitude, seed) {
+  const frame = time * frequency;
+  const current = Math.floor(frame);
+  const blend = smoothstep(frame - current);
+  const a = seededNoise(current + seed * 97.31);
+  const b = seededNoise(current + 1 + seed * 97.31);
+
+  return (a + (b - a) * blend) * amplitude;
+}
+
+function drawTextLayer(word, alpha, yOffset = 0, scale = 1) {
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.translate(0, yOffset);
+  ctx.scale(scale, scale);
+  ctx.fillText(word, 0, 0);
+  ctx.restore();
+}
+
+function getScrambleText(fromWord, toWord, progress, frame) {
+  const length = Math.max(fromWord.length, toWord.length);
+  let text = '';
+
+  for (let i = 0; i < length; i += 1) {
+    const fromChar = fromWord[i] || '';
+    const toChar = toWord[i] || '';
+    const letterProgress = clamp((progress - i / length * 0.35) / 0.65, 0, 1);
+
+    if (letterProgress < 0.18) {
+      text += fromChar || toChar;
+    } else if (letterProgress > 0.82) {
+      text += toChar || fromChar;
+    } else {
+      const noiseIndex = Math.abs(Math.floor(seededNoise(frame + i * 19.17) * TEXT_MORPH_CHARS.length));
+      text += TEXT_MORPH_CHARS[noiseIndex % TEXT_MORPH_CHARS.length];
+    }
+  }
+
+  return text;
+}
+
+function updateSpin() {
+  star.moodTimer -= 1;
+
+  if (star.moodTimer <= 0) {
+    star.spinTarget = MIN_SPIN + Math.random() * (MAX_SPIN - MIN_SPIN);
+    star.moodTimer = 70 + Math.floor(Math.random() * 150);
+  }
+
+  star.spin += (star.spinTarget - star.spin) * SPIN_CHANGE_FORCE;
+  star.spin = clamp(star.spin, MIN_SPIN, MAX_SPIN);
+}
+
+function moveBetweenButtons() {
+  if (buttonTargets.length === 0) {
+    return;
+  }
+
+  const target = buttonTargets[star.targetIndex % buttonTargets.length];
+  const dx = target.x - star.x;
+  const dy = target.y - star.y;
+  const distance = Math.hypot(dx, dy);
+
+  if (distance <= ARRIVAL_DISTANCE) {
+    star.x = target.x;
+    star.y = target.y;
+
+    if (star.holdTimer <= 0) {
+      star.holdTimer = TARGET_HOLD_MIN + Math.floor(Math.random() * (TARGET_HOLD_MAX - TARGET_HOLD_MIN));
+    }
+
+    star.holdTimer -= 1;
+
+    if (star.holdTimer <= 0) {
+      star.targetIndex = (star.targetIndex + 1) % buttonTargets.length;
+    }
+
+    return;
+  }
+
+  star.x += dx * TARGET_EASING;
+  star.y += dy * TARGET_EASING;
+}
+
+function updateExplainerText() {
+  if (!explainerText || buttonTargets.length === 0) {
+    return;
+  }
+
+  const target = buttonTargets[star.targetIndex % buttonTargets.length];
+
+  if (!target || target.label === star.activeLabel) {
+    return;
+  }
+
+  star.activeLabel = target.label;
+  explainerText.classList.add('is-changing');
+
+  window.setTimeout(() => {
+    explainerText.textContent = EXPLAINER_TEXTS[target.label] || target.label;
+    explainerText.classList.remove('is-changing');
+  }, 160);
+}
+
+function drawStar() {
+  ctx.save();
+  ctx.translate(star.x, star.y);
+  ctx.rotate(star.rotation);
+  ctx.globalAlpha = STAR_OPACITY;
+  ctx.fillStyle = STAR_COLOR;
+  ctx.strokeStyle = STAR_COLOR;
+  ctx.lineWidth = 1;
+  ctx.lineJoin = 'round';
+
   ctx.beginPath();
-  ctx.moveTo(-half, -half);
-  ctx.lineTo(half, half);
-  ctx.moveTo(half, -half);
-  ctx.lineTo(-half, half);
+  for (let i = 0; i < STAR_POINTS * 2; i += 1) {
+    const radius = i % 2 === 0 ? STAR_OUTER_RADIUS : STAR_INNER_RADIUS;
+    const angle = (i / (STAR_POINTS * 2)) * Math.PI * 2 - Math.PI / 2;
+    const x = Math.cos(angle) * radius;
+    const y = Math.sin(angle) * radius;
+
+    if (i === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  }
+  ctx.closePath();
+  ctx.fill();
   ctx.stroke();
   ctx.restore();
 }
 
-function limitSpeed(particle) {
-  const speed = Math.hypot(particle.speedX, particle.speedY);
+function drawStarText() {
+  const cycleFrame = star.textTimer % TEXT_SWITCH_FRAMES;
+  const wordIndex = Math.floor(star.textTimer / TEXT_SWITCH_FRAMES) % TEXT_WORDS.length;
+  const nextWordIndex = (wordIndex + 1) % TEXT_WORDS.length;
+  const word = TEXT_WORDS[wordIndex];
+  const nextWord = TEXT_WORDS[nextWordIndex];
+  const morphStart = TEXT_SWITCH_FRAMES - TEXT_MORPH_FRAMES;
+  const isMorphing = cycleFrame >= morphStart;
+  const morphProgress = isMorphing ? smoothstep((cycleFrame - morphStart) / TEXT_MORPH_FRAMES) : 0;
+  const time = star.textTimer / 60;
+  const wiggleX = wiggle(time, TEXT_WIGGLE_FREQUENCY, TEXT_WIGGLE_POSITION, 1);
+  const wiggleY = wiggle(time, TEXT_WIGGLE_FREQUENCY, TEXT_WIGGLE_POSITION, 2);
+  const wiggleRotation = wiggle(time, TEXT_WIGGLE_FREQUENCY, TEXT_WIGGLE_ROTATION, 3);
+  const wiggleScale = 1 + wiggle(time, TEXT_WIGGLE_FREQUENCY, TEXT_WIGGLE_SCALE, 4);
 
-  if (speed > MAX_SPEED) {
-    particle.speedX = (particle.speedX / speed) * MAX_SPEED;
-    particle.speedY = (particle.speedY / speed) * MAX_SPEED;
+  ctx.save();
+  ctx.translate(star.x + wiggleX, star.y + wiggleY);
+  ctx.rotate(wiggleRotation);
+  ctx.scale(wiggleScale, wiggleScale);
+  ctx.fillStyle = TEXT_COLOR;
+  ctx.font = `${TEXT_SIZE}px ${TEXT_FONT}, monospace`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  if (isMorphing) {
+    const scrambleText = getScrambleText(word, nextWord, morphProgress, star.textTimer);
+    drawTextLayer(word, 1 - morphProgress, -morphProgress * 3, 1 + morphProgress * 0.05);
+    drawTextLayer(scrambleText, 0.78, wiggle(time, 18, 1.2, 9), 1);
+    drawTextLayer(nextWord, morphProgress, (1 - morphProgress) * 3, 0.95 + morphProgress * 0.05);
+  } else {
+    ctx.fillText(word, 0, 0);
   }
 
-  if (speed > 0 && speed < MIN_SPEED) {
-    particle.speedX = (particle.speedX / speed) * MIN_SPEED;
-    particle.speedY = (particle.speedY / speed) * MIN_SPEED;
-  }
-}
+  ctx.restore();
 
-function steerAwayFromMouse(particle) {
-  if (!mouse.active) {
-    return;
-  }
-
-  const dx = particle.x - mouse.x;
-  const dy = particle.y - mouse.y;
-  const distance = Math.hypot(dx, dy);
-
-  if (distance === 0 || distance > MOUSE_AVOIDANCE_RADIUS) {
-    return;
-  }
-
-  const strength = (1 - distance / MOUSE_AVOIDANCE_RADIUS) * MOUSE_AVOIDANCE_FORCE;
-  particle.speedX += (dx / distance) * strength;
-  particle.speedY += (dy / distance) * strength;
-}
-
-function steerLikeSwarm(particle, index) {
-  let neighbors = 0;
-  let closeNeighbors = 0;
-  let averageSpeedX = 0;
-  let averageSpeedY = 0;
-  let averageX = 0;
-  let averageY = 0;
-  let separationX = 0;
-  let separationY = 0;
-
-  for (let i = 0; i < particles.length; i += 1) {
-    if (i === index) {
-      continue;
-    }
-
-    const other = particles[i];
-    const dx = other.x - particle.x;
-    const dy = other.y - particle.y;
-    const distance = Math.hypot(dx, dy);
-
-    if (distance === 0 || distance > NEIGHBOR_RADIUS) {
-      continue;
-    }
-
-    neighbors += 1;
-    averageSpeedX += other.speedX;
-    averageSpeedY += other.speedY;
-    averageX += other.x;
-    averageY += other.y;
-
-    if (distance < SEPARATION_RADIUS) {
-      closeNeighbors += 1;
-      separationX -= dx / distance;
-      separationY -= dy / distance;
-    }
-  }
-
-  if (neighbors === 0) {
-    return;
-  }
-
-  averageSpeedX /= neighbors;
-  averageSpeedY /= neighbors;
-  averageX /= neighbors;
-  averageY /= neighbors;
-
-  particle.speedX += (averageSpeedX - particle.speedX) * ALIGNMENT_FORCE;
-  particle.speedY += (averageSpeedY - particle.speedY) * ALIGNMENT_FORCE;
-  particle.speedX += (averageX - particle.x) * COHESION_FORCE;
-  particle.speedY += (averageY - particle.y) * COHESION_FORCE;
-  particle.speedX += separationX * SEPARATION_FORCE;
-  particle.speedY += separationY * SEPARATION_FORCE;
-
-  if (closeNeighbors > CLUSTER_LIMIT) {
-    const pressure = (closeNeighbors - CLUSTER_LIMIT) * CLUSTER_FORCE;
-    particle.speedX += separationX * pressure;
-    particle.speedY += separationY * pressure;
-  }
-}
-
-function steerAroundObstacles(particle) {
-  for (const obstacle of obstacles) {
-    if (
-      particle.x < obstacle.left ||
-      particle.x > obstacle.right ||
-      particle.y < obstacle.top ||
-      particle.y > obstacle.bottom
-    ) {
-      continue;
-    }
-
-    const dx = particle.x - obstacle.centerX || 1;
-    const dy = particle.y - obstacle.centerY || 1;
-    const distance = Math.hypot(dx, dy) || 1;
-    const push = AVOIDANCE_FORCE * (1 + (AVOIDANCE_PADDING / distance));
-
-    particle.x += (dx / distance) * push * AVOIDANCE_PADDING;
-    particle.y += (dy / distance) * push * AVOIDANCE_PADDING;
-    particle.speedX += (dx / distance) * AVOIDANCE_FORCE;
-    particle.speedY += (dy / distance) * AVOIDANCE_FORCE;
-  }
+  star.textTimer += 1;
 }
 
 function animate() {
   ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
-  for (let i = 0; i < particles.length; i += 1) {
-    const particle = particles[i];
-
-    steerLikeSwarm(particle, i);
-    steerAwayFromMouse(particle);
-    steerAroundObstacles(particle);
-
-    particle.speedX += -WANDER_FORCE + Math.random() * WANDER_FORCE * 2;
-    particle.speedY += -0.003 + Math.random() * WANDER_FORCE;
-    limitSpeed(particle);
-
-    particle.x += particle.speedX;
-    particle.y += particle.speedY;
-    particle.rotation += particle.spin;
-
-    if (
-      particle.y < -particle.size ||
-      particle.y > window.innerHeight + particle.size ||
-      particle.x < -particle.size ||
-      particle.x > window.innerWidth + particle.size
-    ) {
-      Object.assign(particle, createParticle(particle.y > window.innerHeight));
-    }
-
-    drawCross(particle);
-  }
+  updateSpin();
+  moveBetweenButtons();
+  updateExplainerText();
+  star.rotation += star.spin;
+  drawStar();
+  drawStarText();
 
   animationFrame = requestAnimationFrame(animate);
 }
@@ -277,12 +306,14 @@ function start() {
   }
 
   resizeCanvas();
-  updateObstacles();
-  seedParticles();
+  updateButtonTargets();
+  explainerText = document.querySelector(EXPLAINER_SELECTOR);
+  star = createStar();
+  updateExplainerText();
 
   if (prefersReducedMotion.matches) {
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    particles.forEach(drawCross);
+    drawStar();
     return;
   }
 
@@ -290,12 +321,6 @@ function start() {
 }
 
 window.addEventListener('resize', start);
-window.addEventListener('mousemove', (event) => {
-  mouse = { x: event.clientX, y: event.clientY, active: true };
-});
-window.addEventListener('mouseleave', () => {
-  mouse.active = false;
-});
 prefersReducedMotion.addEventListener('change', start);
 
 start();
