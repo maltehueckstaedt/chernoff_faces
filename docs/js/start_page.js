@@ -61,7 +61,10 @@ const EXPLAINER_SHAPE_SELECTOR = '.target-explainer-shape';
 const EXPLAINER_PATH_SELECTOR = '.target-explainer-path';
 const CF_LOGO_SELECTOR = '.cf-logo';
 const EXPLAINER_BOX_WIDTH = 320;
+const EXPLAINER_BOX_MIN_WIDTH = 112;
 const EXPLAINER_BOX_MIN_HEIGHT = 56;
+const EXPLAINER_TEXT_HIDE_DELAY = 220;
+const EXPLAINER_TEXT_REVEAL_DELAY = 440;
 const EXPLAINER_TARGET_GAP = 150;
 const EXPLAINER_LINE_GAP = 8;
 const EXPLAINER_LOGO_CLEARANCE = 16;
@@ -87,6 +90,8 @@ let explainerBubble = null;
 let explainerBox = null;
 let explainerShape = null;
 let explainerPath = null;
+let explainerTextChangeTimer = null;
+let explainerTextRevealTimer = null;
 let star = createStar();
 
 if (document.fonts) {
@@ -304,20 +309,41 @@ function updateExplainerText() {
     return;
   }
 
-  if (!explainerBox.textContent) {
-    explainerBox.textContent = EXPLAINER_TEXTS[target.label] || target.label;
-  }
-
-  positionExplainer(target);
   explainerText.classList.remove('target-explainer--hidden');
 
   if (target.label === star.activeLabel) {
+    positionExplainer(target);
     return;
   }
 
   star.activeLabel = target.label;
-  explainerBox.textContent = EXPLAINER_TEXTS[target.label] || target.label;
-  positionExplainer(target);
+  setExplainerCopy(target);
+}
+
+function setExplainerCopy(target) {
+  if (explainerTextChangeTimer) {
+    clearTimeout(explainerTextChangeTimer);
+    explainerTextChangeTimer = null;
+  }
+
+  if (explainerTextRevealTimer) {
+    clearTimeout(explainerTextRevealTimer);
+    explainerTextRevealTimer = null;
+  }
+
+  explainerBox.classList.remove('target-explainer-box--visible');
+
+  explainerTextChangeTimer = window.setTimeout(() => {
+    explainerBox.textContent = EXPLAINER_TEXTS[target.label] || target.label;
+    positionExplainer(target);
+
+    explainerTextRevealTimer = window.setTimeout(() => {
+      explainerBox.classList.add('target-explainer-box--visible');
+      explainerTextRevealTimer = null;
+    }, EXPLAINER_TEXT_REVEAL_DELAY);
+
+    explainerTextChangeTimer = null;
+  }, EXPLAINER_TEXT_HIDE_DELAY);
 }
 
 function positionExplainer(target) {
@@ -338,7 +364,7 @@ function positionExplainer(target) {
 }
 
 function getExplainerLayout(target) {
-  const boxWidth = Math.min(EXPLAINER_BOX_WIDTH, window.innerWidth - 32);
+  const boxWidth = getExplainerBoxWidth();
   const boxHeight = getExplainerBoxHeight(boxWidth);
   const safeMargin = Math.min(VIEWPORT_SAFE_MARGIN, Math.max(16, (window.innerWidth - boxWidth) / 2));
   const targetBoxLeft = target.buttonCenterX - boxWidth / 2;
@@ -527,6 +553,25 @@ function getExplainerBoxHeight(boxWidth) {
   explainerBox.style.height = previousHeight;
 
   return Math.max(measuredHeight || 92, EXPLAINER_BOX_MIN_HEIGHT);
+}
+
+function getExplainerBoxWidth() {
+  const maxWidth = Math.min(EXPLAINER_BOX_WIDTH, window.innerWidth - 32);
+  const probe = explainerBox.cloneNode(true);
+
+  probe.style.position = 'fixed';
+  probe.style.left = '-9999px';
+  probe.style.top = '0';
+  probe.style.width = 'auto';
+  probe.style.height = 'auto';
+  probe.style.whiteSpace = 'nowrap';
+  probe.style.visibility = 'hidden';
+  probe.style.pointerEvents = 'none';
+  document.body.appendChild(probe);
+  const measuredWidth = Math.ceil(probe.scrollWidth);
+  probe.remove();
+
+  return clamp(measuredWidth || maxWidth, Math.min(EXPLAINER_BOX_MIN_WIDTH, maxWidth), maxWidth);
 }
 
 function getStarTarget(target) {
@@ -721,6 +766,16 @@ function start() {
   if (animationFrame) {
     cancelAnimationFrame(animationFrame);
     animationFrame = null;
+  }
+
+  if (explainerTextChangeTimer) {
+    clearTimeout(explainerTextChangeTimer);
+    explainerTextChangeTimer = null;
+  }
+
+  if (explainerTextRevealTimer) {
+    clearTimeout(explainerTextRevealTimer);
+    explainerTextRevealTimer = null;
   }
 
   resizeCanvas();

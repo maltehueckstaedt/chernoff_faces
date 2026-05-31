@@ -125,13 +125,14 @@ body {
 .target-explainer-bubble {
   position: fixed;
   overflow: visible;
-  transition: opacity 0.22s ease, transform 0.34s ease, top 0.34s ease, left 0.34s ease, height 0.34s ease;
+  transition: opacity 0.22s ease, transform 0.34s ease, top 0.42s cubic-bezier(0.65, 0, 0.35, 1), left 0.42s cubic-bezier(0.65, 0, 0.35, 1), width 0.42s cubic-bezier(0.65, 0, 0.35, 1), height 0.42s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 .target-explainer-shape {
   position: absolute;
   overflow: visible;
   pointer-events: none;
+  transition: top 0.42s cubic-bezier(0.65, 0, 0.35, 1), left 0.42s cubic-bezier(0.65, 0, 0.35, 1), width 0.42s cubic-bezier(0.65, 0, 0.35, 1), height 0.42s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 .target-explainer-path {
@@ -159,7 +160,13 @@ body {
   letter-spacing: 0;
   text-align: center;
   overflow: hidden;
-  transition: opacity 0.22s ease;
+  opacity: 0;
+  transition: opacity 0.2s ease, width 0.42s cubic-bezier(0.65, 0, 0.35, 1), height 0.42s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.target-explainer-box--visible {
+  opacity: 1;
+  transition: opacity 0.72s ease, width 0.42s cubic-bezier(0.65, 0, 0.35, 1), height 0.42s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 .target-explainer--hidden .target-explainer-bubble {
