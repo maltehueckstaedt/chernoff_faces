@@ -16,11 +16,17 @@ const TARGET_EASING = 0.035;
 const ARRIVAL_DISTANCE = 1.4;
 const TARGET_HOLD_MIN = 230;
 const TARGET_HOLD_MAX = 340;
-const MIN_SPIN = -0.32;
+const MIN_SPIN = -0.16;
 const MAX_SPIN = 0.12;
-const SPIN_CHANGE_FORCE = 0.0012;
-const SPIN_HOLD_MIN = 180;
-const SPIN_HOLD_MAX = 360;
+const CALM_MIN_SPIN = -0.075;
+const CALM_MAX_SPIN = 0.075;
+const FAST_SPIN_CHANCE = 0.14;
+const FAST_SPIN_HOLD_MIN = 16;
+const FAST_SPIN_HOLD_MAX = 34;
+const SPIN_CHANGE_FORCE = 0.0018;
+const FAST_SPIN_BRAKE_FORCE = 0.018;
+const SPIN_HOLD_MIN = 190;
+const SPIN_HOLD_MAX = 420;
 const TEXT_WORDS = ['Click', 'Here!'];
 const TEXT_SWITCH_FRAMES = 86;
 const TEXT_MORPH_FRAMES = 28;
@@ -136,6 +142,7 @@ function createStar() {
     innerRadiusTarget: STAR_INNER_RADIUS,
     radiusTimer: 0,
     moodTimer: 90,
+    fastSpinActive: false,
     targetIndex: 0,
     activeLabel: '',
     holdTimer: 0,
@@ -219,11 +226,21 @@ function updateSpin() {
   star.moodTimer -= 1;
 
   if (star.moodTimer <= 0) {
-    star.spinTarget = MIN_SPIN + Math.random() * (MAX_SPIN - MIN_SPIN);
-    star.moodTimer = SPIN_HOLD_MIN + Math.floor(Math.random() * (SPIN_HOLD_MAX - SPIN_HOLD_MIN));
+    if (star.fastSpinActive || Math.random() > FAST_SPIN_CHANCE) {
+      star.fastSpinActive = false;
+      star.spinTarget = CALM_MIN_SPIN + Math.random() * (CALM_MAX_SPIN - CALM_MIN_SPIN);
+      star.moodTimer = SPIN_HOLD_MIN + Math.floor(Math.random() * (SPIN_HOLD_MAX - SPIN_HOLD_MIN));
+    } else {
+      star.fastSpinActive = true;
+      star.spinTarget = MIN_SPIN + Math.random() * (MAX_SPIN - MIN_SPIN);
+      star.moodTimer = FAST_SPIN_HOLD_MIN + Math.floor(Math.random() * (FAST_SPIN_HOLD_MAX - FAST_SPIN_HOLD_MIN));
+    }
   }
 
   star.spin += (star.spinTarget - star.spin) * SPIN_CHANGE_FORCE;
+  if (!star.fastSpinActive && Math.abs(star.spin) > CALM_MAX_SPIN) {
+    star.spin += (star.spinTarget - star.spin) * FAST_SPIN_BRAKE_FORCE;
+  }
   star.spin = clamp(star.spin, MIN_SPIN, MAX_SPIN);
 }
 
