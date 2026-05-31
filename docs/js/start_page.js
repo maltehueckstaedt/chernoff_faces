@@ -1,5 +1,7 @@
 const canvas = document.querySelector('.dust-crosses');
 const ctx = canvas.getContext('2d');
+const starCanvas = document.querySelector('.star-crosses');
+const starCtx = starCanvas.getContext('2d');
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 const STAR_POINTS = 15;
@@ -60,12 +62,13 @@ const EXPLAINER_PATH_SELECTOR = '.target-explainer-path';
 const CF_LOGO_SELECTOR = '.cf-logo';
 const EXPLAINER_BOX_WIDTH = 320;
 const EXPLAINER_BOX_MIN_HEIGHT = 56;
-const EXPLAINER_GAP_MIN = 50;
-const EXPLAINER_GAP_MAX = 150;
+const EXPLAINER_TARGET_GAP = 150;
 const EXPLAINER_LINE_GAP = 8;
 const EXPLAINER_LOGO_CLEARANCE = 16;
 const SPEECH_BUBBLE_RADIUS = 28;
 const SPEECH_BUBBLE_POINTER_HALF = 22;
+const SPEECH_BUBBLE_CORNER_BIAS = 0.72;
+const SPEECH_BUBBLE_CENTER_DEAD_ZONE = 0.18;
 const VIEWPORT_SAFE_MARGIN = 84;
 const STAR_BOX_CLEARANCE = -20;
 const EXPLAINER_TEXTS = {
@@ -94,11 +97,13 @@ if (document.fonts) {
 function resizeCanvas() {
   const ratio = window.devicePixelRatio || 1;
 
-  canvas.width = Math.floor(window.innerWidth * ratio);
-  canvas.height = Math.floor(window.innerHeight * ratio);
-  canvas.style.width = `${window.innerWidth}px`;
-  canvas.style.height = `${window.innerHeight}px`;
-  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  [canvas, starCanvas].forEach((layerCanvas) => {
+    layerCanvas.width = Math.floor(window.innerWidth * ratio);
+    layerCanvas.height = Math.floor(window.innerHeight * ratio);
+    layerCanvas.style.width = `${window.innerWidth}px`;
+    layerCanvas.style.height = `${window.innerHeight}px`;
+  });
+  [ctx, starCtx].forEach((layerCtx) => layerCtx.setTransform(ratio, 0, 0, ratio, 0, 0));
 }
 
 function updateButtonTargets() {
@@ -111,7 +116,6 @@ function updateButtonTargets() {
       buttonTop: rect.top,
       buttonBottom: rect.bottom,
       isTopButton: rect.top < window.innerHeight / 2,
-      explainerGap: EXPLAINER_GAP_MIN + Math.random() * (EXPLAINER_GAP_MAX - EXPLAINER_GAP_MIN),
       label,
     };
   });
@@ -191,13 +195,13 @@ function wiggle(time, frequency, amplitude, seed) {
   return (a + (b - a) * blend) * amplitude;
 }
 
-function drawTextLayer(word, alpha, yOffset = 0, scale = 1) {
-  ctx.save();
-  ctx.globalAlpha *= alpha;
-  ctx.translate(0, yOffset);
-  ctx.scale(scale, scale);
-  ctx.fillText(word, 0, 0);
-  ctx.restore();
+function drawTextLayer(renderCtx, word, alpha, yOffset = 0, scale = 1) {
+  renderCtx.save();
+  renderCtx.globalAlpha *= alpha;
+  renderCtx.translate(0, yOffset);
+  renderCtx.scale(scale, scale);
+  renderCtx.fillText(word, 0, 0);
+  renderCtx.restore();
 }
 
 function getScrambleText(fromWord, toWord, progress, frame) {
@@ -312,13 +316,8 @@ function updateExplainerText() {
   }
 
   star.activeLabel = target.label;
-  explainerText.classList.add('target-explainer--changing');
+  explainerBox.textContent = EXPLAINER_TEXTS[target.label] || target.label;
   positionExplainer(target);
-  window.setTimeout(() => {
-    explainerBox.textContent = EXPLAINER_TEXTS[target.label] || target.label;
-    positionExplainer(target);
-    explainerText.classList.remove('target-explainer--changing');
-  }, 160);
 }
 
 function positionExplainer(target) {
@@ -346,9 +345,9 @@ function getExplainerLayout(target) {
   let boxTop;
 
   if (target.isTopButton) {
-    boxTop = target.buttonBottom + target.explainerGap;
+    boxTop = target.buttonBottom + EXPLAINER_TARGET_GAP;
   } else {
-    boxTop = target.buttonTop - target.explainerGap - boxHeight;
+    boxTop = target.buttonTop - EXPLAINER_TARGET_GAP - boxHeight;
   }
 
   const logoAwareBox = getLogoAwareBoxPosition(targetBoxLeft, safeMargin, boxWidth, boxHeight, boxTop);
@@ -377,7 +376,7 @@ function getSpeechBubbleShape(target, boxLeft, boxTop, boxWidth, boxHeight) {
   const tipY = (target.isTopButton
     ? target.buttonBottom + EXPLAINER_LINE_GAP
     : target.buttonTop - EXPLAINER_LINE_GAP) - boxTop;
-  const baseCenter = clamp(tipX, radius + pointerHalf, boxWidth - radius - pointerHalf);
+  const baseCenter = getSpeechBubblePointerBaseCenter(target, tipX, boxWidth, radius, pointerHalf);
   const baseLeft = baseCenter - pointerHalf;
   const baseRight = baseCenter + pointerHalf;
   const viewLeft = Math.min(0, tipX) - 4;
@@ -432,6 +431,25 @@ function getSpeechBubbleShape(target, boxLeft, boxTop, boxWidth, boxHeight) {
     'Z',
     ].join(' '),
   };
+}
+
+function getSpeechBubblePointerBaseCenter(target, tipX, boxWidth, radius, pointerHalf) {
+  const minBaseCenter = radius + pointerHalf;
+  const maxBaseCenter = boxWidth - radius - pointerHalf;
+  const centeredBase = clamp(tipX, minBaseCenter, maxBaseCenter);
+  const viewportCenter = window.innerWidth / 2;
+  const viewportSide = clamp((target.buttonCenterX - viewportCenter) / viewportCenter, -1, 1);
+  const deadZone = SPEECH_BUBBLE_CENTER_DEAD_ZONE;
+
+  if (Math.abs(viewportSide) <= deadZone) {
+    return centeredBase;
+  }
+
+  const sideProgress = (Math.abs(viewportSide) - deadZone) / (1 - deadZone);
+  const cornerBase = viewportSide < 0 ? minBaseCenter : maxBaseCenter;
+  const bias = clamp(sideProgress * SPEECH_BUBBLE_CORNER_BIAS, 0, 1);
+
+  return centeredBase + (cornerBase - centeredBase) * bias;
 }
 
 function getLogoAwareBoxPosition(targetBoxLeft, safeMargin, boxWidth, boxHeight, boxTop) {
@@ -524,29 +542,54 @@ function getStarTarget(target) {
     STAR_OUTER_RADIUS + STAR_INNER_RADIUS_VARIATION,
     STAR_INNER_RADIUS + STAR_SPIKE_VARIATION,
   );
-  const margin = starRadius + STAR_BOX_CLEARANCE;
-  const leftX = layout.boxLeft - starRadius - STAR_BOX_CLEARANCE;
-  const rightX = layout.boxLeft + layout.boxWidth + starRadius + STAR_BOX_CLEARANCE;
-  const x = leftX >= margin ? leftX : rightX;
-  const y = layout.boxTop + layout.boxHeight / 2;
+  const viewportMargin = starRadius + 4;
+  const boxOffset = starRadius + STAR_BOX_CLEARANCE;
+  const centerY = layout.boxTop + layout.boxHeight / 2;
+  const centerX = layout.boxLeft + layout.boxWidth / 2;
+  const leftTarget = {
+    x: layout.boxLeft - boxOffset,
+    y: centerY,
+  };
+  const rightTarget = {
+    x: layout.boxLeft + layout.boxWidth + boxOffset,
+    y: centerY,
+  };
+  const topTarget = {
+    x: centerX,
+    y: layout.boxTop - boxOffset,
+  };
+  const bottomTarget = {
+    x: centerX,
+    y: layout.boxTop + layout.boxHeight + boxOffset,
+  };
+  const verticalTargets = target.isTopButton
+    ? [bottomTarget, topTarget]
+    : [topTarget, bottomTarget];
+  const candidates = [leftTarget, rightTarget, ...verticalTargets];
+  const visibleTarget = candidates.find((candidate) => (
+    candidate.x >= viewportMargin
+    && candidate.x <= window.innerWidth - viewportMargin
+    && candidate.y >= viewportMargin
+    && candidate.y <= window.innerHeight - viewportMargin
+  )) || candidates[candidates.length - 1];
 
   return {
-    x: clamp(x, margin, window.innerWidth - margin),
-    y: clamp(y, margin, window.innerHeight - margin),
+    x: clamp(visibleTarget.x, viewportMargin, window.innerWidth - viewportMargin),
+    y: clamp(visibleTarget.y, viewportMargin, window.innerHeight - viewportMargin),
   };
 }
 
 function drawStarShape(offsetX = 0, offsetY = 0, color = STAR_COLOR) {
-  ctx.save();
-  ctx.translate(star.x + offsetX, star.y + offsetY);
-  ctx.rotate(star.rotation);
-  ctx.globalAlpha = STAR_OPACITY;
-  ctx.fillStyle = color;
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 1;
-  ctx.lineJoin = 'round';
+  starCtx.save();
+  starCtx.translate(star.x + offsetX, star.y + offsetY);
+  starCtx.rotate(star.rotation);
+  starCtx.globalAlpha = STAR_OPACITY;
+  starCtx.fillStyle = color;
+  starCtx.strokeStyle = color;
+  starCtx.lineWidth = 1;
+  starCtx.lineJoin = 'round';
 
-  ctx.beginPath();
+  starCtx.beginPath();
   for (let i = 0; i < STAR_POINTS * 2; i += 1) {
     const radius = i % 2 === 0 ? star.outerRadius : star.innerRadius;
     const angle = (i / (STAR_POINTS * 2)) * Math.PI * 2 - Math.PI / 2;
@@ -554,22 +597,22 @@ function drawStarShape(offsetX = 0, offsetY = 0, color = STAR_COLOR) {
     const y = Math.sin(angle) * radius;
 
     if (i === 0) {
-      ctx.moveTo(x, y);
+      starCtx.moveTo(x, y);
     } else {
-      ctx.lineTo(x, y);
+      starCtx.lineTo(x, y);
     }
   }
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-  ctx.restore();
+  starCtx.closePath();
+  starCtx.fill();
+  starCtx.stroke();
+  starCtx.restore();
 }
 
 function drawStar() {
   drawStarShape();
 }
 
-function drawWigglyMorphText({ x, y, word, nextWord, font, nextFont, timer, size, seedOffset = 0 }) {
+function drawWigglyMorphText({ renderCtx = ctx, x, y, word, nextWord, font, nextFont, timer, size, seedOffset = 0 }) {
   const cycleFrame = timer % TEXT_SWITCH_FRAMES;
   const morphStart = TEXT_SWITCH_FRAMES - TEXT_MORPH_FRAMES;
   const isMorphing = cycleFrame >= morphStart;
@@ -580,27 +623,27 @@ function drawWigglyMorphText({ x, y, word, nextWord, font, nextFont, timer, size
   const wiggleRotation = wiggle(time, TEXT_WIGGLE_FREQUENCY, TEXT_WIGGLE_ROTATION, 3 + seedOffset);
   const wiggleScale = 1 + wiggle(time, TEXT_WIGGLE_FREQUENCY, TEXT_WIGGLE_SCALE, 4 + seedOffset);
 
-  ctx.save();
-  ctx.translate(x + wiggleX, y + wiggleY);
-  ctx.rotate(wiggleRotation);
-  ctx.scale(wiggleScale, wiggleScale);
-  ctx.fillStyle = TEXT_COLOR;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
+  renderCtx.save();
+  renderCtx.translate(x + wiggleX, y + wiggleY);
+  renderCtx.rotate(wiggleRotation);
+  renderCtx.scale(wiggleScale, wiggleScale);
+  renderCtx.fillStyle = TEXT_COLOR;
+  renderCtx.textAlign = 'center';
+  renderCtx.textBaseline = 'middle';
 
   if (isMorphing) {
     const scrambleText = getScrambleText(word, nextWord, morphProgress, timer);
-    ctx.font = `${size}px ${font}, monospace`;
-    drawTextLayer(word, 1 - morphProgress, -morphProgress * 3, 1 + morphProgress * 0.05);
-    ctx.font = `${size}px ${nextFont}, monospace`;
-    drawTextLayer(scrambleText, 0.78, wiggle(time, 18, 1.2, 9 + seedOffset), 1);
-    drawTextLayer(nextWord, morphProgress, (1 - morphProgress) * 3, 0.95 + morphProgress * 0.05);
+    renderCtx.font = `${size}px ${font}, monospace`;
+    drawTextLayer(renderCtx, word, 1 - morphProgress, -morphProgress * 3, 1 + morphProgress * 0.05);
+    renderCtx.font = `${size}px ${nextFont}, monospace`;
+    drawTextLayer(renderCtx, scrambleText, 0.78, wiggle(time, 18, 1.2, 9 + seedOffset), 1);
+    drawTextLayer(renderCtx, nextWord, morphProgress, (1 - morphProgress) * 3, 0.95 + morphProgress * 0.05);
   } else {
-    ctx.font = `${size}px ${font}, monospace`;
-    ctx.fillText(word, 0, 0);
+    renderCtx.font = `${size}px ${font}, monospace`;
+    renderCtx.fillText(word, 0, 0);
   }
 
-  ctx.restore();
+  renderCtx.restore();
 }
 
 function drawStarText() {
@@ -614,6 +657,7 @@ function drawStarText() {
   }
 
   drawWigglyMorphText({
+    renderCtx: starCtx,
     x: star.x,
     y: star.y,
     word: TEXT_WORDS[wordIndex],
@@ -659,6 +703,7 @@ function drawMotherText() {
 
 function animate() {
   ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  starCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
   updateSpin();
   updateStarRadii();
@@ -690,6 +735,7 @@ function start() {
 
   if (prefersReducedMotion.matches) {
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    starCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     drawStar();
     return;
   }
