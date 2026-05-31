@@ -101,8 +101,11 @@ body {
 .target-explainer-box {
   position: relative;
   z-index: 1;
+  display: flex;
+  align-items: center;
   width: min(320px, calc(100vw - 2rem));
-  padding: 0.85rem 1.15rem;
+  min-height: 56px;
+  padding: 1rem 1.25rem;
   border: 0;
   background: transparent;
   font-size: 0.86rem;
@@ -166,6 +169,35 @@ a {
 }
 .oval:hover {
   background: var(--color-hover-bg);
+}
+
+.oval-image {
+  position: relative;
+  overflow: visible;
+}
+
+.oval-image img {
+  position: absolute;
+  left: 40%;
+  top: 78%;
+  width: 155%;
+  max-width: none;
+  max-height: none;
+  transform: translate(-50%, -50%);
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* Struck-through oval variant */

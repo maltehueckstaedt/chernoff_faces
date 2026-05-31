@@ -2,22 +2,25 @@ const canvas = document.querySelector('.dust-crosses');
 const ctx = canvas.getContext('2d');
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-const STAR_POINTS = 20;
-const STAR_OUTER_RADIUS = 44;
-const STAR_INNER_RADIUS = 60;
+const STAR_POINTS = 15;
+const STAR_OUTER_RADIUS = 34;
+const STAR_INNER_RADIUS = 50;
 const STAR_COLOR = '#ff8282';
 const STAR_OPACITY = 1;
-const STAR_PULSE_RADIUS = 4.5;
-const STAR_PULSE_SPEED = 0.055;
-const STAR_SPIKE_VARIATION = 5;
-const STAR_SPIKE_VARIATION_SPEED = 0.038;
+const STAR_SPIKE_VARIATION = 7;
+const STAR_INNER_RADIUS_VARIATION = 4.5;
+const STAR_RADIUS_EASING = 0.045;
+const STAR_RADIUS_HOLD_MIN = 36;
+const STAR_RADIUS_HOLD_MAX = 86;
 const TARGET_EASING = 0.035;
 const ARRIVAL_DISTANCE = 1.4;
 const TARGET_HOLD_MIN = 230;
 const TARGET_HOLD_MAX = 340;
-const MIN_SPIN = -0.555;
-const MAX_SPIN = 0.955;
-const SPIN_CHANGE_FORCE = 0.0025;
+const MIN_SPIN = -0.32;
+const MAX_SPIN = 0.12;
+const SPIN_CHANGE_FORCE = 0.0012;
+const SPIN_HOLD_MIN = 180;
+const SPIN_HOLD_MAX = 360;
 const TEXT_WORDS = ['Click', 'Here!'];
 const TEXT_SWITCH_FRAMES = 86;
 const TEXT_MORPH_FRAMES = 28;
@@ -37,6 +40,7 @@ const EXPLAINER_SHAPE_SELECTOR = '.target-explainer-shape';
 const EXPLAINER_PATH_SELECTOR = '.target-explainer-path';
 const CF_LOGO_SELECTOR = '.cf-logo';
 const EXPLAINER_BOX_WIDTH = 320;
+const EXPLAINER_BOX_MIN_HEIGHT = 56;
 const EXPLAINER_GAP_MIN = 50;
 const EXPLAINER_GAP_MAX = 150;
 const EXPLAINER_LINE_GAP = 8;
@@ -112,6 +116,11 @@ function createStar() {
     rotation: Math.random() * Math.PI * 2,
     spin: -0.025 + Math.random() * 0.05,
     spinTarget: -0.04 + Math.random() * 0.08,
+    outerRadius: STAR_OUTER_RADIUS,
+    outerRadiusTarget: STAR_OUTER_RADIUS,
+    innerRadius: STAR_INNER_RADIUS,
+    innerRadiusTarget: STAR_INNER_RADIUS,
+    radiusTimer: 0,
     moodTimer: 90,
     targetIndex: 0,
     activeLabel: '',
@@ -122,6 +131,10 @@ function createStar() {
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
+}
+
+function randomRange(min, max) {
+  return min + Math.random() * (max - min);
 }
 
 function smoothstep(value) {
@@ -179,11 +192,24 @@ function updateSpin() {
 
   if (star.moodTimer <= 0) {
     star.spinTarget = MIN_SPIN + Math.random() * (MAX_SPIN - MIN_SPIN);
-    star.moodTimer = 70 + Math.floor(Math.random() * 150);
+    star.moodTimer = SPIN_HOLD_MIN + Math.floor(Math.random() * (SPIN_HOLD_MAX - SPIN_HOLD_MIN));
   }
 
   star.spin += (star.spinTarget - star.spin) * SPIN_CHANGE_FORCE;
   star.spin = clamp(star.spin, MIN_SPIN, MAX_SPIN);
+}
+
+function updateStarRadii() {
+  star.radiusTimer -= 1;
+
+  if (star.radiusTimer <= 0) {
+    star.outerRadiusTarget = STAR_OUTER_RADIUS + randomRange(-STAR_INNER_RADIUS_VARIATION, STAR_INNER_RADIUS_VARIATION);
+    star.innerRadiusTarget = STAR_INNER_RADIUS + randomRange(-STAR_SPIKE_VARIATION, STAR_SPIKE_VARIATION);
+    star.radiusTimer = STAR_RADIUS_HOLD_MIN + Math.floor(Math.random() * (STAR_RADIUS_HOLD_MAX - STAR_RADIUS_HOLD_MIN));
+  }
+
+  star.outerRadius += (star.outerRadiusTarget - star.outerRadius) * STAR_RADIUS_EASING;
+  star.innerRadius += (star.innerRadiusTarget - star.innerRadius) * STAR_RADIUS_EASING;
 }
 
 function moveBetweenButtons() {
@@ -437,7 +463,7 @@ function getExplainerBoxHeight(boxWidth) {
   explainerBox.style.width = previousWidth;
   explainerBox.style.height = previousHeight;
 
-  return measuredHeight || 92;
+  return Math.max(measuredHeight || 92, EXPLAINER_BOX_MIN_HEIGHT);
 }
 
 function getStarTarget(target) {
@@ -449,7 +475,10 @@ function getStarTarget(target) {
   }
 
   const layout = getExplainerLayout(target);
-  const starRadius = Math.max(STAR_OUTER_RADIUS, STAR_INNER_RADIUS) + STAR_PULSE_RADIUS + STAR_SPIKE_VARIATION;
+  const starRadius = Math.max(
+    STAR_OUTER_RADIUS + STAR_INNER_RADIUS_VARIATION,
+    STAR_INNER_RADIUS + STAR_SPIKE_VARIATION,
+  );
   const margin = starRadius + STAR_BOX_CLEARANCE;
   const leftX = layout.boxLeft - starRadius - STAR_BOX_CLEARANCE;
   const rightX = layout.boxLeft + layout.boxWidth + starRadius + STAR_BOX_CLEARANCE;
@@ -463,8 +492,6 @@ function getStarTarget(target) {
 }
 
 function drawStar() {
-  const pulse = Math.sin(star.textTimer * STAR_PULSE_SPEED) * STAR_PULSE_RADIUS;
-
   ctx.save();
   ctx.translate(star.x, star.y);
   ctx.rotate(star.rotation);
@@ -476,9 +503,7 @@ function drawStar() {
 
   ctx.beginPath();
   for (let i = 0; i < STAR_POINTS * 2; i += 1) {
-    const baseRadius = i % 2 === 0 ? STAR_OUTER_RADIUS : STAR_INNER_RADIUS;
-    const spikeVariation = Math.sin(star.textTimer * STAR_SPIKE_VARIATION_SPEED + i * 0.9) * STAR_SPIKE_VARIATION;
-    const radius = baseRadius + pulse + spikeVariation;
+    const radius = i % 2 === 0 ? star.outerRadius : star.innerRadius;
     const angle = (i / (STAR_POINTS * 2)) * Math.PI * 2 - Math.PI / 2;
     const x = Math.cos(angle) * radius;
     const y = Math.sin(angle) * radius;
@@ -537,6 +562,7 @@ function animate() {
   ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
   updateSpin();
+  updateStarRadii();
   moveBetweenButtons();
   updateExplainerText();
   star.rotation += star.spin;
