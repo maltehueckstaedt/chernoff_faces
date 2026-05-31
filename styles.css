@@ -24,7 +24,7 @@
   --spacing-sm:  1rem;
   --spacing-md:  2rem;
   --spacing-lg:  3rem;
-  --layout-max:  1180px;
+  --layout-max:  552px;
 }
 
 
@@ -47,7 +47,25 @@ svg {
 /* ── 3. TYPOGRAPHY ── */
 @font-face {
   font-family: 'NineSevenTallPixel';
-  src: url('9x7-tall-pixel.otf') format('opentype');
+  src: url('fonts/9x7-tall-pixel.otf') format('opentype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Becker';
+  src: url('fonts/Becker.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'WallauRundgotisch';
+  src: url('fonts/WallauRundgotischOsF-Heavy.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'WashingtonTextAlternates';
+  src: url('fonts/WashingtonText-Alternates.ttf') format('truetype');
   font-display: swap;
 }
 
@@ -96,6 +114,7 @@ body {
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
+  filter: drop-shadow(-8px 10px 0 color-mix(in srgb, var(--color-hover-bg) 85%, transparent));
 }
 
 .target-explainer-box {

@@ -6,6 +6,9 @@ const STAR_POINTS = 15;
 const STAR_OUTER_RADIUS = 34;
 const STAR_INNER_RADIUS = 50;
 const STAR_COLOR = '#ff8282';
+const STAR_SHADOW_COLOR = 'rgba(210, 210, 210, 0.55)';
+const STAR_SHADOW_OFFSET_X = -8;
+const STAR_SHADOW_OFFSET_Y = 10;
 const STAR_OPACITY = 1;
 const STAR_SPIKE_VARIATION = 7;
 const STAR_INNER_RADIUS_VARIATION = 4.5;
@@ -26,7 +29,12 @@ const TEXT_SWITCH_FRAMES = 86;
 const TEXT_MORPH_FRAMES = 28;
 const TEXT_COLOR = 'red';
 const TEXT_SIZE = 40;
-const TEXT_FONT = 'NineSevenTallPixel';
+const TEXT_FONTS = [
+  'NineSevenTallPixel',
+  'Becker',
+  'WallauRundgotisch',
+  'WashingtonTextAlternates',
+];
 const TEXT_MORPH_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!?<>/\\';
 const TEXT_WIGGLE_FREQUENCY = 10;
 const TEXT_WIGGLE_POSITION = 1.6;
@@ -68,7 +76,7 @@ let explainerPath = null;
 let star = createStar();
 
 if (document.fonts) {
-  document.fonts.load(`${TEXT_SIZE}px ${TEXT_FONT}`);
+  TEXT_FONTS.forEach((font) => document.fonts.load(`${TEXT_SIZE}px ${font}`));
 }
 
 function resizeCanvas() {
@@ -126,6 +134,8 @@ function createStar() {
     activeLabel: '',
     holdTimer: 0,
     textTimer: 0,
+    textFont: TEXT_FONTS[0],
+    textWordIndex: -1,
   };
 }
 
@@ -135,6 +145,10 @@ function clamp(value, min, max) {
 
 function randomRange(min, max) {
   return min + Math.random() * (max - min);
+}
+
+function getRandomTextFont() {
+  return TEXT_FONTS[Math.floor(Math.random() * TEXT_FONTS.length)];
 }
 
 function smoothstep(value) {
@@ -491,13 +505,13 @@ function getStarTarget(target) {
   };
 }
 
-function drawStar() {
+function drawStarShape(offsetX = 0, offsetY = 0, color = STAR_COLOR) {
   ctx.save();
-  ctx.translate(star.x, star.y);
+  ctx.translate(star.x + offsetX, star.y + offsetY);
   ctx.rotate(star.rotation);
   ctx.globalAlpha = STAR_OPACITY;
-  ctx.fillStyle = STAR_COLOR;
-  ctx.strokeStyle = STAR_COLOR;
+  ctx.fillStyle = color;
+  ctx.strokeStyle = color;
   ctx.lineWidth = 1;
   ctx.lineJoin = 'round';
 
@@ -520,12 +534,23 @@ function drawStar() {
   ctx.restore();
 }
 
+function drawStar() {
+  drawStarShape(STAR_SHADOW_OFFSET_X, STAR_SHADOW_OFFSET_Y, STAR_SHADOW_COLOR);
+  drawStarShape();
+}
+
 function drawStarText() {
   const cycleFrame = star.textTimer % TEXT_SWITCH_FRAMES;
   const wordIndex = Math.floor(star.textTimer / TEXT_SWITCH_FRAMES) % TEXT_WORDS.length;
   const nextWordIndex = (wordIndex + 1) % TEXT_WORDS.length;
   const word = TEXT_WORDS[wordIndex];
   const nextWord = TEXT_WORDS[nextWordIndex];
+
+  if (wordIndex !== star.textWordIndex) {
+    star.textWordIndex = wordIndex;
+    star.textFont = getRandomTextFont();
+  }
+
   const morphStart = TEXT_SWITCH_FRAMES - TEXT_MORPH_FRAMES;
   const isMorphing = cycleFrame >= morphStart;
   const morphProgress = isMorphing ? smoothstep((cycleFrame - morphStart) / TEXT_MORPH_FRAMES) : 0;
@@ -540,7 +565,7 @@ function drawStarText() {
   ctx.rotate(wiggleRotation);
   ctx.scale(wiggleScale, wiggleScale);
   ctx.fillStyle = TEXT_COLOR;
-  ctx.font = `${TEXT_SIZE}px ${TEXT_FONT}, monospace`;
+  ctx.font = `${TEXT_SIZE}px ${star.textFont}, monospace`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
