@@ -68,6 +68,8 @@ const EXPLAINER_TEXT_REVEAL_DELAY = 440;
 const EXPLAINER_TARGET_GAP = 150;
 const EXPLAINER_LINE_GAP = 8;
 const EXPLAINER_LOGO_CLEARANCE = 16;
+const EXPLAINER_IDLE_JITTER = 6;
+const EXPLAINER_IDLE_JITTER_HOLD = 0.34;
 const SPEECH_BUBBLE_RADIUS = 28;
 const SPEECH_BUBBLE_POINTER_HALF = 22;
 const SPEECH_BUBBLE_CORNER_BIAS = 0.72;
@@ -377,8 +379,17 @@ function getExplainerLayout(target) {
   }
 
   const logoAwareBox = getLogoAwareBoxPosition(targetBoxLeft, safeMargin, boxWidth, boxHeight, boxTop);
-  const boxLeft = logoAwareBox.left;
-  boxTop = logoAwareBox.top;
+  const idleDrift = getExplainerIdleDrift();
+  const boxLeft = clamp(
+    logoAwareBox.left + idleDrift.x,
+    safeMargin,
+    window.innerWidth - boxWidth - safeMargin,
+  );
+  boxTop = clamp(
+    logoAwareBox.top + idleDrift.y,
+    16,
+    window.innerHeight - boxHeight - 16,
+  );
   const bubbleShape = getSpeechBubbleShape(target, boxLeft, boxTop, boxWidth, boxHeight);
 
   return {
@@ -392,6 +403,16 @@ function getExplainerLayout(target) {
     shapeHeight: bubbleShape.height,
     shapeViewBox: bubbleShape.viewBox,
     bubblePath: bubbleShape.path,
+  };
+}
+
+function getExplainerIdleDrift() {
+  const time = performance.now() / 1000;
+  const step = Math.floor(time / EXPLAINER_IDLE_JITTER_HOLD);
+
+  return {
+    x: seededNoise(step + 21) * EXPLAINER_IDLE_JITTER,
+    y: seededNoise(step + 22) * EXPLAINER_IDLE_JITTER * 0.72,
   };
 }
 
