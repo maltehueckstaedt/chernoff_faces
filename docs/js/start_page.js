@@ -6,9 +6,6 @@ const STAR_POINTS = 15;
 const STAR_OUTER_RADIUS = 34;
 const STAR_INNER_RADIUS = 50;
 const STAR_COLOR = '#ff8282';
-const STAR_SHADOW_COLOR = '#fdf1f1';
-const STAR_SHADOW_OFFSET_X = -8;
-const STAR_SHADOW_OFFSET_Y = 10;
 const STAR_OPACITY = 1;
 const STAR_SPIKE_VARIATION = 7;
 const STAR_INNER_RADIUS_VARIATION = 4.5;
@@ -552,7 +549,6 @@ function drawStarShape(offsetX = 0, offsetY = 0, color = STAR_COLOR) {
 }
 
 function drawStar() {
-  drawStarShape(STAR_SHADOW_OFFSET_X, STAR_SHADOW_OFFSET_Y, STAR_SHADOW_COLOR);
   drawStarShape();
 }
 

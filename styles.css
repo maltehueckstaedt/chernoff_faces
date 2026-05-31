@@ -102,14 +102,14 @@ body {
 .dust-crosses {
   position: fixed;
   inset: 0;
-  z-index: 10;
+  z-index: 30;
   pointer-events: none;
 }
 
 .target-explainer {
   position: fixed;
   inset: 0;
-  z-index: 9;
+  z-index: 20;
   pointer-events: none;
   color: var(--color-text);
 }
