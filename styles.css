@@ -7,7 +7,7 @@
 /* ── 1. CSS VARIABLES ── */
 :root {
   /* Colors */
-  --color-bg:        #fff;
+  --color-bg:        #ffffff;
   --color-text:      #111;
   --color-muted:     #888;
   --color-accent:    red;
@@ -127,12 +127,12 @@ body {
 }
 
 .target-explainer-path {
-  fill: var(--color-bg);
+  fill: #ffe8e8;
   stroke: var(--color-accent);
   stroke-width: 1;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(-8px 10px 0 color-mix(in srgb, var(--color-hover-bg) 85%, transparent));
+  filter: drop-shadow(-8px 10px 0 color-mix(in srgb, #f7f2f2 85%, transparent));
 }
 
 .target-explainer-box {
