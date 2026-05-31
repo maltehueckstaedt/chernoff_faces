@@ -35,12 +35,20 @@ const TEXT_FONTS = [
   'WallauRundgotisch',
   'WashingtonTextAlternates',
 ];
+const MOTHER_TEXT_FONTS = [
+  'MotherPotsdam',
+  'MotherSemperIdem',
+  'MotherWerbedeutsch',
+];
 const TEXT_MORPH_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!?<>/\\';
 const TEXT_WIGGLE_FREQUENCY = 10;
 const TEXT_WIGGLE_POSITION = 1.6;
 const TEXT_WIGGLE_ROTATION = 0.001;
 const TEXT_WIGGLE_SCALE = 0.001;
 const BUTTON_SELECTOR = '.oval';
+const MOTHER_RANDOM_FONT_SELECTOR = '.mother-random-font';
+const MOTHER_TEXT_SIZE = 42;
+const MOTHER_TEXT_SEED_OFFSET = 37;
 const EXPLAINER_SELECTOR = '.target-explainer';
 const EXPLAINER_BUBBLE_SELECTOR = '.target-explainer-bubble';
 const EXPLAINER_BOX_SELECTOR = '.target-explainer-box';
@@ -77,6 +85,7 @@ let star = createStar();
 
 if (document.fonts) {
   TEXT_FONTS.forEach((font) => document.fonts.load(`${TEXT_SIZE}px ${font}`));
+  MOTHER_TEXT_FONTS.forEach((font) => document.fonts.load(`${MOTHER_TEXT_SIZE}px ${font}`));
 }
 
 function resizeCanvas() {
@@ -135,7 +144,11 @@ function createStar() {
     holdTimer: 0,
     textTimer: 0,
     textFont: TEXT_FONTS[0],
+    textNextFont: TEXT_FONTS[1] || TEXT_FONTS[0],
     textWordIndex: -1,
+    motherFont: MOTHER_TEXT_FONTS[0],
+    motherNextFont: MOTHER_TEXT_FONTS[1] || MOTHER_TEXT_FONTS[0],
+    motherCycle: Math.floor(Math.random() * TEXT_SWITCH_FRAMES),
   };
 }
 
@@ -149,6 +162,10 @@ function randomRange(min, max) {
 
 function getRandomTextFont() {
   return TEXT_FONTS[Math.floor(Math.random() * TEXT_FONTS.length)];
+}
+
+function getRandomMotherTextFont() {
+  return MOTHER_TEXT_FONTS[Math.floor(Math.random() * MOTHER_TEXT_FONTS.length)];
 }
 
 function smoothstep(value) {
@@ -539,48 +556,92 @@ function drawStar() {
   drawStarShape();
 }
 
-function drawStarText() {
-  const cycleFrame = star.textTimer % TEXT_SWITCH_FRAMES;
-  const wordIndex = Math.floor(star.textTimer / TEXT_SWITCH_FRAMES) % TEXT_WORDS.length;
-  const nextWordIndex = (wordIndex + 1) % TEXT_WORDS.length;
-  const word = TEXT_WORDS[wordIndex];
-  const nextWord = TEXT_WORDS[nextWordIndex];
-
-  if (wordIndex !== star.textWordIndex) {
-    star.textWordIndex = wordIndex;
-    star.textFont = getRandomTextFont();
-  }
-
+function drawWigglyMorphText({ x, y, word, nextWord, font, nextFont, timer, size, seedOffset = 0 }) {
+  const cycleFrame = timer % TEXT_SWITCH_FRAMES;
   const morphStart = TEXT_SWITCH_FRAMES - TEXT_MORPH_FRAMES;
   const isMorphing = cycleFrame >= morphStart;
   const morphProgress = isMorphing ? smoothstep((cycleFrame - morphStart) / TEXT_MORPH_FRAMES) : 0;
-  const time = star.textTimer / 60;
-  const wiggleX = wiggle(time, TEXT_WIGGLE_FREQUENCY, TEXT_WIGGLE_POSITION, 1);
-  const wiggleY = wiggle(time, TEXT_WIGGLE_FREQUENCY, TEXT_WIGGLE_POSITION, 2);
-  const wiggleRotation = wiggle(time, TEXT_WIGGLE_FREQUENCY, TEXT_WIGGLE_ROTATION, 3);
-  const wiggleScale = 1 + wiggle(time, TEXT_WIGGLE_FREQUENCY, TEXT_WIGGLE_SCALE, 4);
+  const time = timer / 60;
+  const wiggleX = wiggle(time, TEXT_WIGGLE_FREQUENCY, TEXT_WIGGLE_POSITION, 1 + seedOffset);
+  const wiggleY = wiggle(time, TEXT_WIGGLE_FREQUENCY, TEXT_WIGGLE_POSITION, 2 + seedOffset);
+  const wiggleRotation = wiggle(time, TEXT_WIGGLE_FREQUENCY, TEXT_WIGGLE_ROTATION, 3 + seedOffset);
+  const wiggleScale = 1 + wiggle(time, TEXT_WIGGLE_FREQUENCY, TEXT_WIGGLE_SCALE, 4 + seedOffset);
 
   ctx.save();
-  ctx.translate(star.x + wiggleX, star.y + wiggleY);
+  ctx.translate(x + wiggleX, y + wiggleY);
   ctx.rotate(wiggleRotation);
   ctx.scale(wiggleScale, wiggleScale);
   ctx.fillStyle = TEXT_COLOR;
-  ctx.font = `${TEXT_SIZE}px ${star.textFont}, monospace`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
   if (isMorphing) {
-    const scrambleText = getScrambleText(word, nextWord, morphProgress, star.textTimer);
+    const scrambleText = getScrambleText(word, nextWord, morphProgress, timer);
+    ctx.font = `${size}px ${font}, monospace`;
     drawTextLayer(word, 1 - morphProgress, -morphProgress * 3, 1 + morphProgress * 0.05);
-    drawTextLayer(scrambleText, 0.78, wiggle(time, 18, 1.2, 9), 1);
+    ctx.font = `${size}px ${nextFont}, monospace`;
+    drawTextLayer(scrambleText, 0.78, wiggle(time, 18, 1.2, 9 + seedOffset), 1);
     drawTextLayer(nextWord, morphProgress, (1 - morphProgress) * 3, 0.95 + morphProgress * 0.05);
   } else {
+    ctx.font = `${size}px ${font}, monospace`;
     ctx.fillText(word, 0, 0);
   }
 
   ctx.restore();
+}
+
+function drawStarText() {
+  const wordIndex = Math.floor(star.textTimer / TEXT_SWITCH_FRAMES) % TEXT_WORDS.length;
+  const nextWordIndex = (wordIndex + 1) % TEXT_WORDS.length;
+
+  if (wordIndex !== star.textWordIndex) {
+    star.textWordIndex = wordIndex;
+    star.textFont = star.textNextFont;
+    star.textNextFont = getRandomTextFont();
+  }
+
+  drawWigglyMorphText({
+    x: star.x,
+    y: star.y,
+    word: TEXT_WORDS[wordIndex],
+    nextWord: TEXT_WORDS[nextWordIndex],
+    font: star.textFont,
+    nextFont: star.textNextFont,
+    timer: star.textTimer,
+    size: TEXT_SIZE,
+  });
 
   star.textTimer += 1;
+}
+
+function drawMotherText() {
+  const motherButton = document.querySelector(MOTHER_RANDOM_FONT_SELECTOR);
+
+  if (!motherButton) {
+    return;
+  }
+
+  const rect = motherButton.getBoundingClientRect();
+  const cycleFrame = star.motherCycle % TEXT_SWITCH_FRAMES;
+
+  if (cycleFrame === 0) {
+    star.motherFont = star.motherNextFont;
+    star.motherNextFont = getRandomMotherTextFont();
+  }
+
+  drawWigglyMorphText({
+    x: rect.left + rect.width / 2,
+    y: rect.top + rect.height / 2,
+    word: 'Mother',
+    nextWord: 'Mother',
+    font: star.motherFont,
+    nextFont: star.motherNextFont,
+    timer: star.motherCycle,
+    size: MOTHER_TEXT_SIZE,
+    seedOffset: MOTHER_TEXT_SEED_OFFSET,
+  });
+
+  star.motherCycle += 1;
 }
 
 function animate() {
@@ -591,6 +652,7 @@ function animate() {
   moveBetweenButtons();
   updateExplainerText();
   star.rotation += star.spin;
+  drawMotherText();
   drawStar();
   drawStarText();
 

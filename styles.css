@@ -69,6 +69,24 @@ svg {
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'MotherPotsdam';
+  src: url('fonts/mother_collection/Potsdam.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MotherSemperIdem';
+  src: url('fonts/mother_collection/SemperIdem.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MotherWerbedeutsch';
+  src: url('fonts/mother_collection/Werbedeutsch.otf') format('opentype');
+  font-display: swap;
+}
+
 body {
   font-family: var(--font-serif);
   font-size: 1rem;
@@ -111,7 +129,7 @@ body {
 .target-explainer-path {
   fill: var(--color-bg);
   stroke: var(--color-accent);
-  stroke-width: 2;
+  stroke-width: 1;
   stroke-linecap: round;
   stroke-linejoin: round;
   filter: drop-shadow(-8px 10px 0 color-mix(in srgb, var(--color-hover-bg) 85%, transparent));
@@ -190,33 +208,13 @@ a {
   background: var(--color-hover-bg);
 }
 
-.oval-image {
-  position: relative;
+.mother-random-font {
+  color: transparent;
   overflow: visible;
 }
 
-.oval-image img {
-  position: absolute;
-  left: 40%;
-  top: 78%;
-  width: 155%;
-  max-width: none;
-  max-height: none;
-  transform: translate(-50%, -50%);
-  object-fit: contain;
-  pointer-events: none;
-}
-
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  border: 0;
+.mother-random-font span {
+  opacity: 0;
 }
 
 /* Struck-through oval variant */
