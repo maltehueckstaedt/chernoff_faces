@@ -379,14 +379,13 @@ function getExplainerLayout(target) {
   }
 
   const logoAwareBox = getLogoAwareBoxPosition(targetBoxLeft, safeMargin, boxWidth, boxHeight, boxTop);
-  const idleDrift = getExplainerIdleDrift();
   const boxLeft = clamp(
-    logoAwareBox.left + idleDrift.x,
+    logoAwareBox.left,
     safeMargin,
     window.innerWidth - boxWidth - safeMargin,
   );
   boxTop = clamp(
-    logoAwareBox.top + idleDrift.y,
+    logoAwareBox.top,
     16,
     window.innerHeight - boxHeight - 16,
   );
