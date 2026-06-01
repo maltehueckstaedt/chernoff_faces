@@ -32,6 +32,8 @@ const SPIN_HOLD_MAX = 420;
 const TEXT_WORDS = ['Click', 'Here!'];
 const TEXT_SWITCH_FRAMES = 86;
 const TEXT_MORPH_FRAMES = 28;
+const MOTHER_TEXT_SWITCH_FRAMES = 113;
+const MOTHER_TEXT_MORPH_FRAMES = 37;
 const TEXT_COLOR = 'red';
 const TEXT_SIZE = 40;
 const TEXT_FONTS = [
@@ -77,12 +79,14 @@ const SPEECH_BUBBLE_CENTER_DEAD_ZONE = 0.18;
 const VIEWPORT_SAFE_MARGIN = 84;
 const STAR_BOX_CLEARANCE = -20;
 const EXPLAINER_TEXTS = {
-  'Chernoff Faces': 'Animated marks, loose projects, and strange little interfaces.',
-  Mother: 'Mother gathers current image and sound experiments.',
-  Downer: 'Downer points toward slower, darker project material.',
-  'LOCAL FIST': 'Local Fist is the rough local signal.',
-  Contact: 'For messages, requests, and possible collaborations.',
-  Close: 'A small exit sign with no real exit yet.',
+  'Chernoff Faces': '...to go home.',
+  Mother: '...to watch the first short film by Chernoff Faces.',
+  Downer: "...to get initial information about the second Chernoff Faces short film. If you liked Mother, you'll love Downer!",
+  About: '...to learn everything you need to know about Chernoff Faces.', 
+  Contact: '...to send Messages or Requests. Note: We ignore commercial inquiries! Fuck art, fuck commercials!',
+  Close: '...no idea what will happen if you click here. Maybe you\'ll leave this page?',
+  'Imprint Text': 'Read Imprint!',
+  'Home Button': 'Go home!',
 };
 
 let animationFrame = null;
@@ -114,6 +118,13 @@ function resizeCanvas() {
 }
 
 function updateButtonTargets() {
+  if (document.body.classList.contains('legal-page')) {
+    buttonTargets = Array.from(document.querySelectorAll('.legal-title, .legal-header .brand'))
+      .map(createExplainerTarget)
+      .filter(Boolean);
+    return;
+  }
+
   buttonTargets = Array.from(document.querySelectorAll(BUTTON_SELECTOR)).map((element) => {
     const rect = element.getBoundingClientRect();
     const label = getButtonLabel(element);
@@ -126,6 +137,24 @@ function updateButtonTargets() {
       label,
     };
   });
+}
+
+function createExplainerTarget(element) {
+  const rect = element.getBoundingClientRect();
+
+  if (rect.width <= 0 || rect.height <= 0) {
+    return null;
+  }
+
+  return {
+    buttonCenterX: rect.left + rect.width / 2,
+    buttonTop: rect.top,
+    buttonBottom: rect.bottom,
+    isTopButton: element.dataset.explainerPlacement === 'above'
+      ? false
+      : rect.top < window.innerHeight / 2,
+    label: element.dataset.explainerLabel || getButtonLabel(element),
+  };
 }
 
 function getButtonLabel(element) {
@@ -163,7 +192,7 @@ function createStar() {
     textWordIndex: -1,
     motherFont: MOTHER_TEXT_FONTS[0],
     motherNextFont: MOTHER_TEXT_FONTS[1] || MOTHER_TEXT_FONTS[0],
-    motherCycle: Math.floor(Math.random() * TEXT_SWITCH_FRAMES),
+    motherCycle: Math.floor(Math.random() * MOTHER_TEXT_SWITCH_FRAMES),
   };
 }
 
@@ -563,14 +592,18 @@ function rectsOverlap(a, b) {
 }
 
 function getExplainerBoxHeight(boxWidth) {
-  const previousWidth = explainerBox.style.width;
-  const previousHeight = explainerBox.style.height;
+  const probe = explainerBox.cloneNode(true);
 
-  explainerBox.style.width = `${boxWidth}px`;
-  explainerBox.style.height = 'auto';
-  const measuredHeight = Math.ceil(explainerBox.scrollHeight);
-  explainerBox.style.width = previousWidth;
-  explainerBox.style.height = previousHeight;
+  probe.style.position = 'fixed';
+  probe.style.left = '-9999px';
+  probe.style.top = '0';
+  probe.style.width = `${boxWidth}px`;
+  probe.style.height = 'auto';
+  probe.style.visibility = 'hidden';
+  probe.style.pointerEvents = 'none';
+  document.body.appendChild(probe);
+  const measuredHeight = Math.ceil(probe.scrollHeight);
+  probe.remove();
 
   return Math.max(measuredHeight || 92, EXPLAINER_BOX_MIN_HEIGHT);
 }
@@ -644,7 +677,19 @@ function getStarTarget(target) {
   };
 }
 
-function drawStarShape(offsetX = 0, offsetY = 0, color = STAR_COLOR) {
+function getPageStarColor() {
+  return document.body.classList.contains('legal-page') ? '#fff' : STAR_COLOR;
+}
+
+function getPageTextColor() {
+  return document.body.classList.contains('legal-page') ? '#111' : TEXT_COLOR;
+}
+
+function getPageTextWords() {
+  return document.body.classList.contains('legal-page') ? ['Read', 'Here!'] : TEXT_WORDS;
+}
+
+function drawStarShape(offsetX = 0, offsetY = 0, color = getPageStarColor()) {
   starCtx.save();
   starCtx.translate(star.x + offsetX, star.y + offsetY);
   starCtx.rotate(star.rotation);
@@ -677,11 +722,24 @@ function drawStar() {
   drawStarShape();
 }
 
-function drawWigglyMorphText({ renderCtx = ctx, x, y, word, nextWord, font, nextFont, timer, size, seedOffset = 0 }) {
-  const cycleFrame = timer % TEXT_SWITCH_FRAMES;
-  const morphStart = TEXT_SWITCH_FRAMES - TEXT_MORPH_FRAMES;
+function drawWigglyMorphText({
+  renderCtx = ctx,
+  x,
+  y,
+  word,
+  nextWord,
+  font,
+  nextFont,
+  timer,
+  size,
+  seedOffset = 0,
+  switchFrames = TEXT_SWITCH_FRAMES,
+  morphFrames = TEXT_MORPH_FRAMES,
+}) {
+  const cycleFrame = timer % switchFrames;
+  const morphStart = switchFrames - morphFrames;
   const isMorphing = cycleFrame >= morphStart;
-  const morphProgress = isMorphing ? smoothstep((cycleFrame - morphStart) / TEXT_MORPH_FRAMES) : 0;
+  const morphProgress = isMorphing ? smoothstep((cycleFrame - morphStart) / morphFrames) : 0;
   const time = timer / 60;
   const wiggleX = wiggle(time, TEXT_WIGGLE_FREQUENCY, TEXT_WIGGLE_POSITION, 1 + seedOffset);
   const wiggleY = wiggle(time, TEXT_WIGGLE_FREQUENCY, TEXT_WIGGLE_POSITION, 2 + seedOffset);
@@ -692,7 +750,7 @@ function drawWigglyMorphText({ renderCtx = ctx, x, y, word, nextWord, font, next
   renderCtx.translate(x + wiggleX, y + wiggleY);
   renderCtx.rotate(wiggleRotation);
   renderCtx.scale(wiggleScale, wiggleScale);
-  renderCtx.fillStyle = TEXT_COLOR;
+  renderCtx.fillStyle = getPageTextColor();
   renderCtx.textAlign = 'center';
   renderCtx.textBaseline = 'middle';
 
@@ -712,8 +770,9 @@ function drawWigglyMorphText({ renderCtx = ctx, x, y, word, nextWord, font, next
 }
 
 function drawStarText() {
-  const wordIndex = Math.floor(star.textTimer / TEXT_SWITCH_FRAMES) % TEXT_WORDS.length;
-  const nextWordIndex = (wordIndex + 1) % TEXT_WORDS.length;
+  const textWords = getPageTextWords();
+  const wordIndex = Math.floor(star.textTimer / TEXT_SWITCH_FRAMES) % textWords.length;
+  const nextWordIndex = (wordIndex + 1) % textWords.length;
 
   if (wordIndex !== star.textWordIndex) {
     star.textWordIndex = wordIndex;
@@ -725,8 +784,8 @@ function drawStarText() {
     renderCtx: starCtx,
     x: star.x,
     y: star.y,
-    word: TEXT_WORDS[wordIndex],
-    nextWord: TEXT_WORDS[nextWordIndex],
+    word: textWords[wordIndex],
+    nextWord: textWords[nextWordIndex],
     font: star.textFont,
     nextFont: star.textNextFont,
     timer: star.textTimer,
@@ -744,7 +803,7 @@ function drawMotherText() {
   }
 
   const rect = motherButton.getBoundingClientRect();
-  const cycleFrame = star.motherCycle % TEXT_SWITCH_FRAMES;
+  const cycleFrame = star.motherCycle % MOTHER_TEXT_SWITCH_FRAMES;
 
   if (cycleFrame === 0) {
     star.motherFont = star.motherNextFont;
@@ -761,6 +820,8 @@ function drawMotherText() {
     timer: star.motherCycle,
     size: MOTHER_TEXT_SIZE,
     seedOffset: MOTHER_TEXT_SEED_OFFSET,
+    switchFrames: MOTHER_TEXT_SWITCH_FRAMES,
+    morphFrames: MOTHER_TEXT_MORPH_FRAMES,
   });
 
   star.motherCycle += 1;
