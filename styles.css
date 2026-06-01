@@ -367,9 +367,9 @@ footer {
 }
 
 .cf-logo {
-  width: clamp(72px, 10vw, 118px);
+  width: clamp(144px, 20vw, 36px);
   height: auto;
-  max-height: 110px; 
+  max-height: 220px; 
   aspect-ratio: 440.66 / 603.21;
   object-fit: contain;
 }
@@ -484,7 +484,7 @@ main {
   }
 
   .cf-logo {
-    width: clamp(64px, 24vw, 96px);
+    width: clamp(128px, 48vw, 192px);
   }
 }
 
