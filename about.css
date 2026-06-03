@@ -1,0 +1,132 @@
+/* ============================================================
+   ABOUT PAGE — about.css
+   Page-specific styles for about.html.
+   Requires: styles.css
+   ============================================================ */
+
+.about-page {
+  --color-bg: #111827;
+  --color-text: #ff4a4a;
+  --color-muted: #ff9a9a;
+  --color-hover-bg: rgba(255, 74, 74, 0.08);
+  --border-solid: 1.5px solid var(--color-text);
+  --border-dashed: 1px solid var(--color-text);
+  min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.about-page .target-explainer-path {
+  fill: #bfe2e4;
+  stroke: #000;
+  filter: drop-shadow(-8px 10px 0 rgba(0, 0, 0, 0.28));
+}
+
+.about-page .target-explainer-box {
+  color: #000;
+}
+
+.about-page .impressum-link {
+  color: var(--color-text);
+}
+
+/* ── LAYOUT ── */
+.about-content {
+  width: min(var(--layout-max), calc(100vw - 6rem));
+  margin: 0 auto;
+  padding: 3rem 1rem 4rem;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+/* ── FAQ GRID ── */
+.faq-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 1.25rem;
+  width: 100%;
+}
+
+.faq-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* ── ACCORDION ITEM ── */
+.faq-item {
+  border: var(--border-dashed);
+  border-radius: 9999px;
+  overflow: hidden;
+  transition: border-radius 0.35s ease, box-shadow 0.35s ease;
+}
+
+.faq-item--open {
+  border-radius: 1.2rem;
+  box-shadow: -6px 8px 0 rgba(0, 0, 0, 0.35);
+}
+
+.faq-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1.25rem;
+  background: transparent;
+  border: 0;
+  color: var(--color-text);
+  font-family: var(--font-serif);
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.faq-trigger:hover {
+  background: var(--color-hover-bg);
+}
+
+.faq-icon {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  fill: currentColor;
+  transition: transform 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.faq-item--open .faq-icon {
+  transform: rotate(-180deg);
+}
+
+/* ── ACCORDION BODY ── */
+.faq-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.45s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.faq-body p {
+  padding: 0 1.25rem 1rem;
+  font-size: 0.75rem;
+  line-height: 1.55;
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.faq-body a {
+  color: var(--color-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+  .faq-grid {
+    grid-template-columns: 1fr;
+  }
+}

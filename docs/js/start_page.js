@@ -129,7 +129,7 @@ function resizeCanvas() {
 }
 
 function updateButtonTargets() {
-  if (document.body.classList.contains('legal-page') || document.body.classList.contains('contact-page')) {
+  if (document.body.classList.contains('legal-page') || document.body.classList.contains('contact-page') || document.body.classList.contains('about-page')) {
     buttonTargets = Array.from(document.querySelectorAll('.legal-title, .contact-title, .legal-header .brand, .form-submit'))
       .map(createExplainerTarget)
       .filter(Boolean);
@@ -416,13 +416,14 @@ function getExplainerLayout(target) {
 
   const logoAwareBox = getLogoAwareBoxPosition(targetBoxLeft, safeMargin, boxWidth, boxHeight, boxTop);
   const formAwareBox = getContactFormAwareBoxPosition(target, logoAwareBox.left, logoAwareBox.top, safeMargin, boxWidth, boxHeight);
+  const faqAwareBox = getFaqGridAwareBoxPosition(formAwareBox.left, formAwareBox.top, safeMargin, boxWidth, boxHeight);
   const boxLeft = clamp(
-    formAwareBox.left,
+    faqAwareBox.left,
     safeMargin,
     window.innerWidth - boxWidth - safeMargin,
   );
   boxTop = clamp(
-    formAwareBox.top,
+    faqAwareBox.top,
     16,
     window.innerHeight - boxHeight - 16,
   );
@@ -588,6 +589,47 @@ function getLogoAwareBoxPosition(targetBoxLeft, safeMargin, boxWidth, boxHeight,
 
 function getExplainerTargetGap(target) {
   return (target.label === 'Contact' || target.label === 'Send Message') ? CONTACT_EXPLAINER_TARGET_GAP : EXPLAINER_TARGET_GAP;
+}
+
+function getFaqGridAwareBoxPosition(boxLeft, boxTop, safeMargin, boxWidth, boxHeight) {
+  const grid = document.querySelector('.faq-grid');
+
+  if (!grid) {
+    return { left: boxLeft, top: boxTop };
+  }
+
+  const gridRect = getPaddedRect(grid.getBoundingClientRect(), EXPLAINER_FORM_CLEARANCE);
+  const boxRect = {
+    left: boxLeft,
+    right: boxLeft + boxWidth,
+    top: boxTop,
+    bottom: boxTop + boxHeight,
+  };
+
+  if (!rectsOverlap(boxRect, gridRect)) {
+    return { left: boxLeft, top: boxTop };
+  }
+
+  const candidates = [
+    { left: boxLeft, top: gridRect.top - boxHeight },
+    { left: gridRect.left - boxWidth, top: boxTop },
+    { left: gridRect.right, top: boxTop },
+    { left: boxLeft, top: gridRect.bottom },
+  ]
+    .map((candidate) => ({
+      left: clamp(candidate.left, safeMargin, window.innerWidth - boxWidth - safeMargin),
+      top: clamp(candidate.top, 16, window.innerHeight - boxHeight - 16),
+    }))
+    .filter((candidate, index, items) => (
+      items.findIndex((item) => item.left === candidate.left && item.top === candidate.top) === index
+    ));
+
+  return candidates.find((candidate) => !rectsOverlap({
+    left: candidate.left,
+    right: candidate.left + boxWidth,
+    top: candidate.top,
+    bottom: candidate.top + boxHeight,
+  }, gridRect)) || { left: boxLeft, top: boxTop };
 }
 
 function getContactFormAwareBoxPosition(target, boxLeft, boxTop, safeMargin, boxWidth, boxHeight) {

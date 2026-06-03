@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About - Chernoff Faces</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="about.css" />
+</head>
+<body class="about-page">
+  <canvas class="dust-crosses" aria-hidden="true"></canvas>
+  <div class="target-explainer target-explainer--hidden" aria-live="polite">
+    <div class="target-explainer-bubble">
+      <svg class="target-explainer-shape" aria-hidden="true">
+        <path class="target-explainer-path"></path>
+      </svg>
+      <div class="target-explainer-box"></div>
+    </div>
+  </div>
+  <canvas class="star-crosses" aria-hidden="true"></canvas>
+
+  <header class="legal-header">
+    <a class="oval brand" href="index.html" data-explainer-label="Home Button">Chernoff<br />Faces</a>
+  </header>
+
+  <main class="about-content">
+    <div class="oval legal-title" data-explainer-label="About" data-explainer-placement="above">About</div>
+
+    <div class="faq-grid">
+
+      <div class="faq-col">
+        <!-- 1 -->
+        <div class="faq-item">
+          <button class="faq-trigger" aria-expanded="false">
+            <span>Who are the Chernoff Faces?</span>
+            <svg class="faq-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+            </svg>
+          </button>
+          <div class="faq-body">
+            <p>Chernoff Faces is an independent film collective based in Potsdam. We make short films that live somewhere between art and unease.</p>
+          </div>
+        </div>
+
+        <!-- 2 -->
+        <div class="faq-item">
+          <button class="faq-trigger" aria-expanded="false">
+            <span>What is &ldquo;Mother&rdquo;?</span>
+            <svg class="faq-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+            </svg>
+          </button>
+          <div class="faq-body">
+            <p>&ldquo;Mother&rdquo; is the first short film by Chernoff Faces. Watch it to understand everything. Or nothing.</p>
+          </div>
+        </div>
+
+        <!-- 3 -->
+        <div class="faq-item">
+          <button class="faq-trigger" aria-expanded="false">
+            <span>What is &ldquo;Downer&rdquo;?</span>
+            <svg class="faq-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+            </svg>
+          </button>
+          <div class="faq-body">
+            <p>&ldquo;Downer&rdquo; is our second short film, currently in development. If you liked Mother, you&rsquo;ll love Downer.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-col">
+        <!-- 4 -->
+        <div class="faq-item">
+          <button class="faq-trigger" aria-expanded="false">
+            <span>Can I collaborate or contribute?</span>
+            <svg class="faq-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+            </svg>
+          </button>
+          <div class="faq-body">
+            <p>Yes &mdash; but only if you have something genuinely interesting to offer. Reach out via the <a href="contact.html">contact page</a>.</p>
+          </div>
+        </div>
+
+        <!-- 5 -->
+        <div class="faq-item">
+          <button class="faq-trigger" aria-expanded="false">
+            <span>Do you accept commercial inquiries?</span>
+            <svg class="faq-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+            </svg>
+          </button>
+          <div class="faq-body">
+            <p>For God&rsquo;s sake, leave us alone with your commercial inquiries.</p>
+          </div>
+        </div>
+
+        <!-- 6 -->
+        <div class="faq-item">
+          <button class="faq-trigger" aria-expanded="false">
+            <span>Where can I find more information?</span>
+            <svg class="faq-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+            </svg>
+          </button>
+          <div class="faq-body">
+            <p>Right here. This is it. There is nowhere else.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <a class="impressum-link" href="imprint.html">IMPRINT / 印記 / छाप / AVISO LEGAL / MENTIONS LÉGALES / 法律声明 / إشعار قانوني</a>
+
+  <script src="docs/js/start_page.js?v=4"></script>
+  <script>
+    document.querySelectorAll('.faq-trigger').forEach(function (trigger) {
+      trigger.addEventListener('click', function () {
+        const item = trigger.closest('.faq-item');
+        const isOpen = item.classList.contains('faq-item--open');
+
+        // Close all others in the same column
+        item.closest('.faq-col').querySelectorAll('.faq-item--open').forEach(function (open) {
+          open.classList.remove('faq-item--open');
+          open.querySelector('.faq-trigger').setAttribute('aria-expanded', 'false');
+          open.querySelector('.faq-body').style.maxHeight = null;
+        });
+
+        if (!isOpen) {
+          item.classList.add('faq-item--open');
+          trigger.setAttribute('aria-expanded', 'true');
+          item.querySelector('.faq-body').style.maxHeight = item.querySelector('.faq-body').scrollHeight + 'px';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
