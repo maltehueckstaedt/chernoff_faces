@@ -657,12 +657,13 @@ main {
     padding: var(--spacing-md) var(--spacing-lg);
   }
 
-  footer > .oval {
+  footer > .oval:first-of-type,
+  footer > a.oval:first-of-type {
     grid-column: 1;
     grid-row: 1;
   }
 
-  footer > a.oval {
+  footer > a.oval:last-of-type {
     grid-column: 1;
     grid-row: 2;
   }
