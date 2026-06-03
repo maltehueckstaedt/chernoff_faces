@@ -30,6 +30,7 @@ const FAST_SPIN_BRAKE_FORCE = 0.018;
 const SPIN_HOLD_MIN = 190;
 const SPIN_HOLD_MAX = 420;
 const TEXT_WORDS = ['Click', 'Here!'];
+const CONTACT_TEXT_WORDS = ['Write', 'Here!'];
 const TEXT_SWITCH_FRAMES = 86;
 const TEXT_MORPH_FRAMES = 28;
 const MOTHER_TEXT_SWITCH_FRAMES = 113;
@@ -46,6 +47,12 @@ const MOTHER_TEXT_FONTS = [
   'MotherPotsdam',
   'MotherSemperIdem',
   'MotherWerbedeutsch',
+];
+const CONTACT_TEXT_FONTS = [
+  'ContactBillHicks',
+  'ContactBlackSirkka',
+  'ContactGermanUnderground',
+  'ContactTulpeFraktur',
 ];
 const TEXT_MORPH_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!?<>/\\';
 const TEXT_WIGGLE_FREQUENCY = 10;
@@ -68,8 +75,10 @@ const EXPLAINER_BOX_MIN_HEIGHT = 56;
 const EXPLAINER_TEXT_HIDE_DELAY = 220;
 const EXPLAINER_TEXT_REVEAL_DELAY = 440;
 const EXPLAINER_TARGET_GAP = 150;
+const CONTACT_EXPLAINER_TARGET_GAP = 24;
 const EXPLAINER_LINE_GAP = 8;
 const EXPLAINER_LOGO_CLEARANCE = 16;
+const EXPLAINER_FORM_CLEARANCE = 18;
 const EXPLAINER_IDLE_JITTER = 6;
 const EXPLAINER_IDLE_JITTER_HOLD = 0.34;
 const SPEECH_BUBBLE_RADIUS = 28;
@@ -79,14 +88,15 @@ const SPEECH_BUBBLE_CENTER_DEAD_ZONE = 0.18;
 const VIEWPORT_SAFE_MARGIN = 84;
 const STAR_BOX_CLEARANCE = -20;
 const EXPLAINER_TEXTS = {
-  'Chernoff Faces': '...to go home.',
+  'Chernoff Faces': 'go home',
   Mother: '...to watch the first short film by Chernoff Faces.',
   Downer: "...to get initial information about the second Chernoff Faces short film. If you liked Mother, you'll love Downer!",
   About: '...to learn everything you need to know about Chernoff Faces.', 
-  Contact: '...to send Messages or Requests. Note: We ignore commercial inquiries! Fuck art, fuck commercials!',
+  Contact: '...to contact!',
   Close: '...no idea what will happen if you click here. Maybe you\'ll leave this page?',
   'Imprint Text': 'Read Imprint!',
-  'Home Button': 'Go home!',
+  'Home Button': '...to go home!',
+  'Send Message': '...to send your message!',
 };
 
 let animationFrame = null;
@@ -103,6 +113,7 @@ let star = createStar();
 if (document.fonts) {
   TEXT_FONTS.forEach((font) => document.fonts.load(`${TEXT_SIZE}px ${font}`));
   MOTHER_TEXT_FONTS.forEach((font) => document.fonts.load(`${MOTHER_TEXT_SIZE}px ${font}`));
+  CONTACT_TEXT_FONTS.forEach((font) => document.fonts.load(`${TEXT_SIZE}px ${font}`));
 }
 
 function resizeCanvas() {
@@ -118,25 +129,16 @@ function resizeCanvas() {
 }
 
 function updateButtonTargets() {
-  if (document.body.classList.contains('legal-page')) {
-    buttonTargets = Array.from(document.querySelectorAll('.legal-title, .legal-header .brand'))
+  if (document.body.classList.contains('legal-page') || document.body.classList.contains('contact-page')) {
+    buttonTargets = Array.from(document.querySelectorAll('.legal-title, .contact-title, .legal-header .brand, .form-submit'))
       .map(createExplainerTarget)
       .filter(Boolean);
     return;
   }
 
-  buttonTargets = Array.from(document.querySelectorAll(BUTTON_SELECTOR)).map((element) => {
-    const rect = element.getBoundingClientRect();
-    const label = getButtonLabel(element);
-
-    return {
-      buttonCenterX: rect.left + rect.width / 2,
-      buttonTop: rect.top,
-      buttonBottom: rect.bottom,
-      isTopButton: rect.top < window.innerHeight / 2,
-      label,
-    };
-  });
+  buttonTargets = Array.from(document.querySelectorAll(BUTTON_SELECTOR))
+    .map(createExplainerTarget)
+    .filter(Boolean);
 }
 
 function createExplainerTarget(element) {
@@ -148,11 +150,15 @@ function createExplainerTarget(element) {
 
   return {
     buttonCenterX: rect.left + rect.width / 2,
+    buttonLeft: rect.left,
+    buttonRight: rect.right,
     buttonTop: rect.top,
     buttonBottom: rect.bottom,
     isTopButton: element.dataset.explainerPlacement === 'above'
       ? false
-      : rect.top < window.innerHeight / 2,
+      : element.dataset.explainerPlacement === 'below'
+        ? true
+        : rect.top < window.innerHeight / 2,
     label: element.dataset.explainerLabel || getButtonLabel(element),
   };
 }
@@ -205,7 +211,8 @@ function randomRange(min, max) {
 }
 
 function getRandomTextFont() {
-  return TEXT_FONTS[Math.floor(Math.random() * TEXT_FONTS.length)];
+  const fonts = document.body.classList.contains('contact-page') ? CONTACT_TEXT_FONTS : TEXT_FONTS;
+  return fonts[Math.floor(Math.random() * fonts.length)];
 }
 
 function getRandomMotherTextFont() {
@@ -365,7 +372,7 @@ function setExplainerCopy(target) {
   explainerBox.classList.remove('target-explainer-box--visible');
 
   explainerTextChangeTimer = window.setTimeout(() => {
-    explainerBox.textContent = EXPLAINER_TEXTS[target.label] || target.label;
+    explainerBox.innerHTML = EXPLAINER_TEXTS[target.label] || target.label;
     positionExplainer(target);
 
     explainerTextRevealTimer = window.setTimeout(() => {
@@ -402,19 +409,20 @@ function getExplainerLayout(target) {
   let boxTop;
 
   if (target.isTopButton) {
-    boxTop = target.buttonBottom + EXPLAINER_TARGET_GAP;
+    boxTop = target.buttonBottom + getExplainerTargetGap(target);
   } else {
-    boxTop = target.buttonTop - EXPLAINER_TARGET_GAP - boxHeight;
+    boxTop = target.buttonTop - getExplainerTargetGap(target) - boxHeight;
   }
 
   const logoAwareBox = getLogoAwareBoxPosition(targetBoxLeft, safeMargin, boxWidth, boxHeight, boxTop);
+  const formAwareBox = getContactFormAwareBoxPosition(target, logoAwareBox.left, logoAwareBox.top, safeMargin, boxWidth, boxHeight);
   const boxLeft = clamp(
-    logoAwareBox.left,
+    formAwareBox.left,
     safeMargin,
     window.innerWidth - boxWidth - safeMargin,
   );
   boxTop = clamp(
-    logoAwareBox.top,
+    formAwareBox.top,
     16,
     window.innerHeight - boxHeight - 16,
   );
@@ -578,6 +586,51 @@ function getLogoAwareBoxPosition(targetBoxLeft, safeMargin, boxWidth, boxHeight,
   return { left: boxLeft, top: freeTop ?? boxTop };
 }
 
+function getExplainerTargetGap(target) {
+  return (target.label === 'Contact' || target.label === 'Send Message') ? CONTACT_EXPLAINER_TARGET_GAP : EXPLAINER_TARGET_GAP;
+}
+
+function getContactFormAwareBoxPosition(target, boxLeft, boxTop, safeMargin, boxWidth, boxHeight) {
+  const form = document.querySelector('.contact-form');
+
+  if (!form) {
+    return { left: boxLeft, top: boxTop };
+  }
+
+  const formRect = getPaddedRect(form.getBoundingClientRect(), EXPLAINER_FORM_CLEARANCE);
+  const boxRect = {
+    left: boxLeft,
+    right: boxLeft + boxWidth,
+    top: boxTop,
+    bottom: boxTop + boxHeight,
+  };
+
+  if (!rectsOverlap(boxRect, formRect)) {
+    return { left: boxLeft, top: boxTop };
+  }
+
+  const candidates = [
+    { left: boxLeft, top: formRect.top - boxHeight },
+    { left: formRect.left - boxWidth, top: boxTop },
+    { left: formRect.right, top: boxTop },
+    { left: boxLeft, top: formRect.bottom },
+  ]
+    .map((candidate) => ({
+      left: clamp(candidate.left, safeMargin, window.innerWidth - boxWidth - safeMargin),
+      top: clamp(candidate.top, 16, window.innerHeight - boxHeight - 16),
+    }))
+    .filter((candidate, index, items) => (
+      items.findIndex((item) => item.left === candidate.left && item.top === candidate.top) === index
+    ));
+
+  return candidates.find((candidate) => !rectsOverlap({
+    left: candidate.left,
+    right: candidate.left + boxWidth,
+    top: candidate.top,
+    bottom: candidate.top + boxHeight,
+  }, formRect)) || { left: boxLeft, top: boxTop };
+}
+
 function getPaddedRect(rect, padding) {
   return {
     left: rect.left - padding,
@@ -686,6 +739,10 @@ function getPageTextColor() {
 }
 
 function getPageTextWords() {
+  if (star.activeLabel === 'Contact') {
+    return CONTACT_TEXT_WORDS;
+  }
+
   return document.body.classList.contains('legal-page') ? ['Read', 'Here!'] : TEXT_WORDS;
 }
 
