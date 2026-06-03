@@ -28,18 +28,32 @@
 
     <form class="contact-form" action="https://formspree.io/f/mdavnvgp" method="POST" novalidate>
 
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" placeholder="your@email.com" required />
+      <div class="form-item">
+        <button type="button" class="form-trigger" aria-expanded="false" aria-controls="email-body">
+          <span>Email</span>
+          <svg class="form-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+          </svg>
+        </button>
+        <div class="form-body" id="email-body">
+          <input type="email" id="email" name="email" aria-label="Email" placeholder="your@email.com" required />
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="message">Message</label>
-        <textarea id="message" name="message" placeholder="Write your message here..." required></textarea>
-        <small class="form-note">Note: For God's sake, leave us alone with your commercial inquiries!</small>
+      <div class="form-item">
+        <button type="button" class="form-trigger" aria-expanded="false" aria-controls="message-body">
+          <span>Message</span>
+          <svg class="form-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+          </svg>
+        </button>
+        <div class="form-body" id="message-body">
+          <textarea id="message" name="message" aria-label="Message" placeholder="Write your message here..." required></textarea>
+          <small class="form-note">Note: For God&rsquo;s sake, leave us alone with your commercial inquiries!</small>
+        </div>
       </div>
 
-      <button type="submit" class="oval form-submit" data-explainer-label="Send Message" data-explainer-placement="below">Send Message</button>
+      <button type="submit" class="oval form-submit">Send Message</button>
     </form>
   </main>
 
@@ -49,16 +63,46 @@
 
   <script src="docs/js/start_page.js?v=6"></script>
   <script>
+    function openFormItem(item) {
+      item.classList.add('form-item--open');
+      item.querySelector('.form-trigger').setAttribute('aria-expanded', 'true');
+      item.querySelector('.form-body').style.maxHeight = item.querySelector('.form-body').scrollHeight + 'px';
+    }
+
+    function closeFormItem(item) {
+      item.classList.remove('form-item--open');
+      item.querySelector('.form-trigger').setAttribute('aria-expanded', 'false');
+      item.querySelector('.form-body').style.maxHeight = null;
+    }
+
+    document.querySelectorAll('.form-trigger').forEach(function (trigger) {
+      trigger.addEventListener('click', function () {
+        const item = trigger.closest('.form-item');
+        const isOpen = item.classList.contains('form-item--open');
+        if (isOpen) {
+          closeFormItem(item);
+        } else {
+          openFormItem(item);
+          setTimeout(function () {
+            const field = item.querySelector('input, textarea');
+            if (field) field.focus();
+          }, 60);
+        }
+
+      });
+    });
+
     document.querySelector('.contact-form').addEventListener('submit', function (e) {
       const email = document.getElementById('email');
       const message = document.getElementById('message');
       let valid = true;
 
-      [email, message].forEach((field) => {
+      [email, message].forEach(function (field) {
         field.classList.remove('field-error');
         if (!field.value.trim()) {
           field.classList.add('field-error');
           valid = false;
+          openFormItem(field.closest('.form-item'));
         }
       });
 

@@ -75,7 +75,6 @@ const EXPLAINER_BOX_MIN_HEIGHT = 56;
 const EXPLAINER_TEXT_HIDE_DELAY = 220;
 const EXPLAINER_TEXT_REVEAL_DELAY = 440;
 const EXPLAINER_TARGET_GAP = 150;
-const CONTACT_EXPLAINER_TARGET_GAP = 24;
 const EXPLAINER_LINE_GAP = 8;
 const EXPLAINER_LOGO_CLEARANCE = 16;
 const EXPLAINER_FORM_CLEARANCE = 18;
@@ -93,10 +92,8 @@ const EXPLAINER_TEXTS = {
   Downer: "...to get initial information about the second Chernoff Faces short film. If you liked Mother, you'll love Downer!",
   About: '...to learn everything you need to know about Chernoff Faces.', 
   Contact: '...to contact!',
-  Close: '...no idea what will happen if you click here. Maybe you\'ll leave this page?',
   'Imprint Text': 'Read Imprint!',
   'Home Button': '...to go home!',
-  'Send Message': '...to send your message!',
 };
 
 let animationFrame = null;
@@ -130,7 +127,7 @@ function resizeCanvas() {
 
 function updateButtonTargets() {
   if (document.body.classList.contains('legal-page') || document.body.classList.contains('contact-page') || document.body.classList.contains('about-page')) {
-    buttonTargets = Array.from(document.querySelectorAll('.legal-title, .contact-title, .legal-header .brand, .form-submit'))
+    buttonTargets = Array.from(document.querySelectorAll('.legal-title, .contact-title, .legal-header .brand'))
       .map(createExplainerTarget)
       .filter(Boolean);
     return;
@@ -587,8 +584,8 @@ function getLogoAwareBoxPosition(targetBoxLeft, safeMargin, boxWidth, boxHeight,
   return { left: boxLeft, top: freeTop ?? boxTop };
 }
 
-function getExplainerTargetGap(target) {
-  return (target.label === 'Contact' || target.label === 'Send Message') ? CONTACT_EXPLAINER_TARGET_GAP : EXPLAINER_TARGET_GAP;
+function getExplainerTargetGap() {
+  return EXPLAINER_TARGET_GAP;
 }
 
 function getFaqGridAwareBoxPosition(boxLeft, boxTop, safeMargin, boxWidth, boxHeight) {
