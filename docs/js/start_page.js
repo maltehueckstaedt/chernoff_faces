@@ -817,7 +817,7 @@ function getPageStarColor() {
     return motherStarColor;
   }
 
-  return document.body.classList.contains('legal-page') ? '#fff' : STAR_COLOR;
+  return STAR_COLOR;
 }
 
 function getPageTextColor() {

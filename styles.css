@@ -432,13 +432,12 @@ footer {
 }
 
 .legal-page .impressum-link {
-  color: var(--color-text);
   pointer-events: none;
 }
 
 .legal-page {
   min-height: 100vh;
-  background: #ff4a4a;
+  background: var(--color-bg);
 }
 
 .legal-header {

@@ -5,28 +5,8 @@
    ============================================================ */
 
 .contact-page {
-  --color-bg: #3f1b0a;
-  --color-text: #ff4a4a;
-  --color-muted: #ff9a9a;
-  --color-hover-bg: rgba(255, 74, 74, 0.12);
-  --border-solid: 1.5px solid var(--color-text);
-  --border-dashed: 1px solid var(--color-text);
   min-height: 100vh;
   background: var(--color-bg);
-  color: var(--color-text);
-}
-
-.contact-page .target-explainer-path {
-  fill: #bfe2e4;
-  stroke: #000;
-  filter: drop-shadow(-8px 10px 0 rgba(0, 0, 0, 0.28));
-}
-
-.contact-page .target-explainer-box {
-  color: #000;
-}
-
-.contact-page .impressum-link {
   color: var(--color-text);
 }
 
