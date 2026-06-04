@@ -12,6 +12,31 @@
   padding: 1rem;
 }
 
+.mother-vhs-wrap {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+}
+
+.mother-yt-link {
+  position: absolute;
+  bottom: 6%;
+  right: 4%;
+  width: 34.4%;
+  display: block;
+}
+
+.mother-yt-link img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: opacity 0.2s;
+}
+
+.mother-yt-link:hover img {
+  opacity: 0.8;
+}
+
 .mother-vhs {
   display: block;
   width: min(78vw, 520px);
@@ -24,5 +49,9 @@
   .mother-vhs {
     width: min(88vw, 420px);
     max-height: calc(100svh - 2rem);
+  }
+
+  .mother-yt-link {
+    width: 40%;
   }
 }

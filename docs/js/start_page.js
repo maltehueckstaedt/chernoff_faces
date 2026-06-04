@@ -130,7 +130,7 @@ function resizeCanvas() {
 
 function updateButtonTargets() {
   if (document.body.classList.contains('legal-page') || document.body.classList.contains('contact-page') || document.body.classList.contains('about-page') || document.body.classList.contains('mother-page')) {
-    buttonTargets = Array.from(document.querySelectorAll('.legal-title, .contact-title, .mother-vhs, .legal-header .brand'))
+    buttonTargets = Array.from(document.querySelectorAll('.legal-title, .contact-title, .mother-yt-link, .legal-header .brand'))
       .map(createExplainerTarget)
       .filter(Boolean);
     return;
