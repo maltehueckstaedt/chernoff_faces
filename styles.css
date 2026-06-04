@@ -150,7 +150,7 @@ body {
 }
 
 .target-explainer {
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 40;
   pointer-events: none;
@@ -158,11 +158,12 @@ body {
 }
 
 .star-crosses {
+  position: absolute;
   z-index: 50;
 }
 
 .target-explainer-bubble {
-  position: fixed;
+  position: absolute;
   overflow: visible;
   transition: opacity 0.22s ease, transform 0.34s ease, top 0.42s cubic-bezier(0.65, 0, 0.35, 1), left 0.42s cubic-bezier(0.65, 0, 0.35, 1), width 0.42s cubic-bezier(0.65, 0, 0.35, 1), height 0.42s cubic-bezier(0.65, 0, 0.35, 1);
 }
