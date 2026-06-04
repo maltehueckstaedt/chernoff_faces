@@ -31,6 +31,7 @@ const SPIN_HOLD_MIN = 190;
 const SPIN_HOLD_MAX = 420;
 const TEXT_WORDS = ['Click', 'Here!'];
 const CONTACT_TEXT_WORDS = ['Write', 'Here!'];
+const WATCH_TEXT_WORDS = ['Please', 'Watch!'];
 const TEXT_SWITCH_FRAMES = 86;
 const TEXT_MORPH_FRAMES = 28;
 const MOTHER_TEXT_SWITCH_FRAMES = 113;
@@ -86,6 +87,7 @@ const SPEECH_BUBBLE_CORNER_BIAS = 0.72;
 const SPEECH_BUBBLE_CENTER_DEAD_ZONE = 0.18;
 const VIEWPORT_SAFE_MARGIN = 84;
 const STAR_BOX_CLEARANCE = -20;
+const STAR_POINTER_CLEARANCE = 16;
 const EXPLAINER_TEXTS = {
   'Chernoff Faces': 'go home',
   Mother: '...to watch the first short film by Chernoff Faces.',
@@ -94,6 +96,7 @@ const EXPLAINER_TEXTS = {
   Contact: '...to contact!',
   'Imprint Text': 'Read Imprint!',
   'Home Button': '...to go home!',
+  'Mother Image': '...on YouTube!',
 };
 
 let animationFrame = null;
@@ -126,8 +129,8 @@ function resizeCanvas() {
 }
 
 function updateButtonTargets() {
-  if (document.body.classList.contains('legal-page') || document.body.classList.contains('contact-page') || document.body.classList.contains('about-page')) {
-    buttonTargets = Array.from(document.querySelectorAll('.legal-title, .contact-title, .legal-header .brand'))
+  if (document.body.classList.contains('legal-page') || document.body.classList.contains('contact-page') || document.body.classList.contains('about-page') || document.body.classList.contains('mother-page')) {
+    buttonTargets = Array.from(document.querySelectorAll('.legal-title, .contact-title, .mother-vhs, .legal-header .brand'))
       .map(createExplainerTarget)
       .filter(Boolean);
     return;
@@ -437,6 +440,7 @@ function getExplainerLayout(target) {
     shapeHeight: bubbleShape.height,
     shapeViewBox: bubbleShape.viewBox,
     bubblePath: bubbleShape.path,
+    pointerRect: bubbleShape.pointerRect,
   };
 }
 
@@ -474,6 +478,15 @@ function getSpeechBubbleShape(target, boxLeft, boxTop, boxWidth, boxHeight) {
     width: viewRight - viewLeft,
     height: viewBottom - viewTop,
     viewBox,
+    pointerRect: getSpeechBubblePointerRect(
+      boxLeft,
+      boxTop,
+      tipX,
+      tipY,
+      baseLeft,
+      baseRight,
+      target.isTopButton ? 0 : boxHeight,
+    ),
   };
 
   if (target.isTopButton) {
@@ -534,6 +547,15 @@ function getSpeechBubblePointerBaseCenter(target, tipX, boxWidth, radius, pointe
   const bias = clamp(sideProgress * SPEECH_BUBBLE_CORNER_BIAS, 0, 1);
 
   return centeredBase + (cornerBase - centeredBase) * bias;
+}
+
+function getSpeechBubblePointerRect(boxLeft, boxTop, tipX, tipY, baseLeft, baseRight, baseY) {
+  return getPaddedRect({
+    left: boxLeft + Math.min(tipX, baseLeft, baseRight),
+    right: boxLeft + Math.max(tipX, baseLeft, baseRight),
+    top: boxTop + Math.min(tipY, baseY),
+    bottom: boxTop + Math.max(tipY, baseY),
+  }, STAR_POINTER_CLEARANCE);
 }
 
 function getLogoAwareBoxPosition(targetBoxLeft, safeMargin, boxWidth, boxHeight, boxTop) {
@@ -759,12 +781,17 @@ function getStarTarget(target) {
     ? [bottomTarget, topTarget]
     : [topTarget, bottomTarget];
   const candidates = [leftTarget, rightTarget, ...verticalTargets];
-  const visibleTarget = candidates.find((candidate) => (
-    candidate.x >= viewportMargin
-    && candidate.x <= window.innerWidth - viewportMargin
-    && candidate.y >= viewportMargin
-    && candidate.y <= window.innerHeight - viewportMargin
-  )) || candidates[candidates.length - 1];
+  const visibleTarget = candidates
+    .map((candidate) => ({
+      x: clamp(candidate.x, viewportMargin, window.innerWidth - viewportMargin),
+      y: clamp(candidate.y, viewportMargin, window.innerHeight - viewportMargin),
+    }))
+    .map((candidate) => ({
+      ...candidate,
+      score: getStarPointerOverlapScore(candidate, starRadius, layout.pointerRect)
+        + Math.hypot(candidate.x - centerX, candidate.y - centerY),
+    }))
+    .sort((a, b) => a.score - b.score)[0] || candidates[candidates.length - 1];
 
   return {
     x: clamp(visibleTarget.x, viewportMargin, window.innerWidth - viewportMargin),
@@ -772,17 +799,48 @@ function getStarTarget(target) {
   };
 }
 
+function getStarPointerOverlapScore(candidate, starRadius, pointerRect) {
+  const starRect = {
+    left: candidate.x - starRadius,
+    right: candidate.x + starRadius,
+    top: candidate.y - starRadius,
+    bottom: candidate.y + starRadius,
+  };
+
+  return rectsOverlap(starRect, pointerRect) ? 10000 : 0;
+}
+
 function getPageStarColor() {
+  const motherStarColor = getPageCssVariable('--mother-star-color');
+
+  if (motherStarColor) {
+    return motherStarColor;
+  }
+
   return document.body.classList.contains('legal-page') ? '#fff' : STAR_COLOR;
 }
 
 function getPageTextColor() {
+  const motherStarTextColor = getPageCssVariable('--mother-star-text-color');
+
+  if (motherStarTextColor) {
+    return motherStarTextColor;
+  }
+
   return document.body.classList.contains('legal-page') ? '#111' : TEXT_COLOR;
+}
+
+function getPageCssVariable(name) {
+  return getComputedStyle(document.body).getPropertyValue(name).trim();
 }
 
 function getPageTextWords() {
   if (star.activeLabel === 'Contact') {
     return CONTACT_TEXT_WORDS;
+  }
+
+  if (star.activeLabel === 'Mother Image') {
+    return WATCH_TEXT_WORDS;
   }
 
   return document.body.classList.contains('legal-page') ? ['Read', 'Here!'] : TEXT_WORDS;
