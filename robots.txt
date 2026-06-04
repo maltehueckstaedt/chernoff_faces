@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://maltehueckstaedt.github.io/chernoff_faces/sitemap.xml
