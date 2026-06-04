@@ -326,7 +326,15 @@ function moveBetweenButtons() {
     star.holdTimer -= 1;
 
     if (star.holdTimer <= 0) {
-      star.targetIndex = (star.targetIndex + 1) % buttonTargets.length;
+      if (buttonTargets.length > 1) {
+        let next;
+        do {
+          next = Math.floor(Math.random() * buttonTargets.length);
+        } while (next === star.targetIndex);
+        star.targetIndex = next;
+      } else {
+        star.targetIndex = 0;
+      }
     }
 
     return;
@@ -827,7 +835,7 @@ function getPageTextColor() {
     return motherStarTextColor;
   }
 
-  return document.body.classList.contains('legal-page') ? '#111' : TEXT_COLOR;
+  return TEXT_COLOR;
 }
 
 function getPageCssVariable(name) {
@@ -1018,12 +1026,15 @@ function start() {
 
   resizeCanvas();
   updateButtonTargets();
+  star = createStar();
+  if (buttonTargets.length > 1) {
+    star.targetIndex = Math.floor(Math.random() * buttonTargets.length);
+  }
   explainerText = document.querySelector(EXPLAINER_SELECTOR);
   explainerBubble = document.querySelector(EXPLAINER_BUBBLE_SELECTOR);
   explainerBox = document.querySelector(EXPLAINER_BOX_SELECTOR);
   explainerShape = document.querySelector(EXPLAINER_SHAPE_SELECTOR);
   explainerPath = document.querySelector(EXPLAINER_PATH_SELECTOR);
-  star = createStar();
   updateExplainerText();
 
   if (prefersReducedMotion.matches) {

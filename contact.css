@@ -13,7 +13,7 @@
 .contact-content {
   width: min(640px, calc(100vw - 2rem));
   margin: 0 auto;
-  padding: 3rem 1rem;
+  padding: 6rem 1rem 3rem;
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -42,6 +42,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  margin-top: 3rem;
 }
 
 /* ── ACCORDION ITEMS ── */
@@ -125,7 +126,7 @@
 
 .form-body input::placeholder,
 .form-body textarea::placeholder {
-  color: rgba(255, 74, 74, 0.45);
+  color: rgba(71, 48, 48, 0.45);
 }
 
 .form-body input:focus,
@@ -150,7 +151,7 @@
 
 .form-submit {
   align-self: center;
-  margin-top: 0.18rem;
+  margin-top: 4.5rem;
   color: var(--color-text);
 }
 
