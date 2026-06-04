@@ -100,12 +100,6 @@ svg {
 }
 
 @font-face {
-  font-family: 'ContactKomplex';
-  src: url('fonts/contact_collection/Komplex.ttf') format('truetype');
-  font-display: swap;
-}
-
-@font-face {
   font-family: 'ContactGermanUnderground';
   src: url('fonts/contact_collection/GermanUnderground.ttf') format('truetype');
   font-display: swap;
