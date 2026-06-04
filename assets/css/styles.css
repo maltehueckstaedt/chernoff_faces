@@ -50,67 +50,67 @@ svg {
 /* ── 3. TYPOGRAPHY ── */
 @font-face {
   font-family: 'NineSevenTallPixel';
-  src: url('fonts/9x7-tall-pixel.otf') format('opentype');
+  src: url('../fonts/9x7-tall-pixel.otf') format('opentype');
   font-display: swap;
 }
 
 @font-face {
   font-family: 'Becker';
-  src: url('fonts/Becker.ttf') format('truetype');
+  src: url('../fonts/Becker.ttf') format('truetype');
   font-display: swap;
 }
 
 @font-face {
   font-family: 'WallauRundgotisch';
-  src: url('fonts/WallauRundgotischOsF-Heavy.ttf') format('truetype');
+  src: url('../fonts/WallauRundgotischOsF-Heavy.ttf') format('truetype');
   font-display: swap;
 }
 
 @font-face {
   font-family: 'WashingtonTextAlternates';
-  src: url('fonts/WashingtonText-Alternates.ttf') format('truetype');
+  src: url('../fonts/WashingtonText-Alternates.ttf') format('truetype');
   font-display: swap;
 }
 
 @font-face {
   font-family: 'MotherPotsdam';
-  src: url('fonts/mother_collection/Potsdam.ttf') format('truetype');
+  src: url('../fonts/mother_collection/Potsdam.ttf') format('truetype');
   font-display: swap;
 }
 
 @font-face {
   font-family: 'MotherSemperIdem';
-  src: url('fonts/mother_collection/SemperIdem.ttf') format('truetype');
+  src: url('../fonts/mother_collection/SemperIdem.ttf') format('truetype');
   font-display: swap;
 }
 
 @font-face {
   font-family: 'MotherWerbedeutsch';
-  src: url('fonts/mother_collection/Werbedeutsch.otf') format('opentype');
+  src: url('../fonts/mother_collection/Werbedeutsch.otf') format('opentype');
   font-display: swap;
 }
 
 @font-face {
   font-family: 'ContactBillHicks';
-  src: url('fonts/contact_collection/BillHicks.ttf') format('truetype');
+  src: url('../fonts/contact_collection/BillHicks.ttf') format('truetype');
   font-display: swap;
 }
 
 @font-face {
   font-family: 'ContactBlackSirkka';
-  src: url('fonts/contact_collection/BlackSirkka-Bold.ttf') format('truetype');
+  src: url('../fonts/contact_collection/BlackSirkka-Bold.ttf') format('truetype');
   font-display: swap;
 }
 
 @font-face {
   font-family: 'ContactGermanUnderground';
-  src: url('fonts/contact_collection/GermanUnderground.ttf') format('truetype');
+  src: url('../fonts/contact_collection/GermanUnderground.ttf') format('truetype');
   font-display: swap;
 }
 
 @font-face {
   font-family: 'ContactTulpeFraktur';
-  src: url('fonts/contact_collection/TulpeFrakturDemoNF.otf') format('opentype');
+  src: url('../fonts/contact_collection/TulpeFrakturDemoNF.otf') format('opentype');
   font-display: swap;
 }
 
