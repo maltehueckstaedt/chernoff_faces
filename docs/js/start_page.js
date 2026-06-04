@@ -454,9 +454,12 @@ function getSpeechBubbleShape(target, boxLeft, boxTop, boxWidth, boxHeight) {
   const radius = Math.min(SPEECH_BUBBLE_RADIUS, boxHeight / 2, boxWidth / 2);
   const pointerHalf = Math.min(SPEECH_BUBBLE_POINTER_HALF, boxWidth / 5);
   const tipX = target.buttonCenterX - boxLeft;
-  const tipY = (target.isTopButton
+  const rawTipY = (target.isTopButton
     ? target.buttonBottom + EXPLAINER_LINE_GAP
     : target.buttonTop - EXPLAINER_LINE_GAP) - boxTop;
+  const tipY = target.isTopButton
+    ? Math.min(rawTipY, -EXPLAINER_LINE_GAP)
+    : Math.max(rawTipY, boxHeight + EXPLAINER_LINE_GAP);
   const baseCenter = getSpeechBubblePointerBaseCenter(target, tipX, boxWidth, radius, pointerHalf);
   const baseLeft = baseCenter - pointerHalf;
   const baseRight = baseCenter + pointerHalf;
