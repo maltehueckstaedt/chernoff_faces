@@ -137,6 +137,7 @@ function updateButtonTargets() {
   }
 
   buttonTargets = Array.from(document.querySelectorAll(BUTTON_SELECTOR))
+    .filter((el) => !el.classList.contains('brand'))
     .map(createExplainerTarget)
     .filter(Boolean);
 }
