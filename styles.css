@@ -25,6 +25,9 @@
   --spacing-md:  2rem;
   --spacing-lg:  3rem;
   --layout-max:  552px;
+  --site-gutter: 3rem;
+  --site-width: min(var(--layout-max), calc(100vw - (var(--site-gutter) * 2)));
+  --site-left: max(calc((100vw - var(--layout-max)) / 2), var(--site-gutter));
 }
 
 
@@ -343,7 +346,7 @@ a {
 
 /* ── 6. HEADER & NAVIGATION ── */
 header {
-  width: min(var(--layout-max), calc(100vw - 6rem));
+  width: var(--site-width);
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -439,7 +442,9 @@ footer {
 }
 
 .legal-header {
-  width: min(var(--layout-max), calc(100vw - 6rem));
+  width: var(--site-width);
+  margin-left: var(--site-left);
+  margin-right: 0;
   justify-content: flex-start;
 }
 
