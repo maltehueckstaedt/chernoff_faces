@@ -1,4 +1,4 @@
-# Chernoff Faces Website <a href="http://srv-data01:30080/hex/HEXmatchR"><img src="assets/images/cf_logo.png" align="right" height="200" style="float:right; height:150px;" alt="HEXmatchR website" /></a>
+# Chernoff Faces Website <a href="[http://srv-data01:30080/hex/HEXmatchR](https://maltehueckstaedt.github.io/chernoff_faces/)"><img src="assets/images/cf_logo.png" align="right" height="200" style="float:right; height:150px;" alt="HEXmatchR website" /></a>
 
 [![Live](https://img.shields.io/badge/live-chernofffaces-red)](https://maltehueckstaedt.github.io/chernoff_faces/)
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white)
