@@ -319,7 +319,9 @@ a {
 }
 
 .oval--shaking {
-  animation: oval-shake 0.45s ease-in-out;
+  animation: oval-shake 0.675s ease-in-out;
+  color: var(--color-accent);
+  border-color: var(--color-accent);
 }
 
 

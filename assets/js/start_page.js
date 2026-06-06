@@ -1053,14 +1053,29 @@ prefersReducedMotion.addEventListener('change', start);
 
 const downerOval = document.querySelector('.downer-oval');
 if (downerOval) {
+  const DOWNER_WORDS = ['NOT', 'OPEN,', 'YET!'];
+  let downerCycleInterval = null;
+
   downerOval.addEventListener('click', (e) => {
     e.preventDefault();
     if (prefersReducedMotion.matches) return;
+
+    clearInterval(downerCycleInterval);
     downerOval.classList.remove('oval--shaking');
     void downerOval.offsetWidth;
     downerOval.classList.add('oval--shaking');
+
+    let wordIndex = 0;
+    downerOval.textContent = DOWNER_WORDS[wordIndex];
+    downerCycleInterval = setInterval(() => {
+      wordIndex = (wordIndex + 1) % DOWNER_WORDS.length;
+      downerOval.textContent = DOWNER_WORDS[wordIndex];
+    }, 225);
+
     downerOval.addEventListener('animationend', () => {
+      clearInterval(downerCycleInterval);
       downerOval.classList.remove('oval--shaking');
+      downerOval.textContent = 'Downer';
     }, { once: true });
   });
 }
