@@ -166,7 +166,7 @@ function createExplainerTarget(element) {
 
 function getButtonLabel(element) {
   const text = element.textContent.replace(/\s+/g, ' ').trim();
-  return text === '×' ? 'Close' : text;
+  return text === '×' ? '...absolutely no idea what will happen then' : text;
 }
 
 function createStar() {
