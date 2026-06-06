@@ -50,5 +50,19 @@
   <div class="enjoy-link">ENJOY! THANK YOU! / 享受吧！謝謝！ / आनंद लें! धन्यवाद! / ¡DISFRUTA! ¡GRACIAS! / PROFITEZ-EN ! MERCI ! / 享受吧！谢谢！ / استمتع! شكرًا لك!</div>
 
   <script src="assets/js/start_page.js?v=7"></script>
+  <script>
+    const ytLink = document.querySelector('.mother-yt-link');
+    if (ytLink) {
+      ytLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        const href = ytLink.href;
+        ytLink.classList.add('yt-launching');
+        setTimeout(() => {
+          ytLink.classList.remove('yt-launching');
+          window.open(href, '_blank', 'noopener,noreferrer');
+        }, 3000);
+      });
+    }
+  </script>
 </body>
 </html>

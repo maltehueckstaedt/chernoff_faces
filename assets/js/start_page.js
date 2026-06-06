@@ -1081,3 +1081,13 @@ if (downerOval) {
 }
 
 start();
+
+// Music player
+const bgMusic = document.getElementById('bg-music');
+const musicPlay = document.getElementById('music-play');
+const musicStop = document.getElementById('music-stop');
+
+if (bgMusic && musicPlay && musicStop) {
+  musicPlay.addEventListener('click', () => bgMusic.play());
+  musicStop.addEventListener('click', () => { bgMusic.pause(); bgMusic.currentTime = 0; });
+}

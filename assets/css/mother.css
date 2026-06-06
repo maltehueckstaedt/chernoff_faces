@@ -30,11 +30,37 @@
   width: 100%;
   height: auto;
   display: block;
-  transition: opacity 0.2s;
+  transition: transform 0.18s ease;
 }
 
 .mother-yt-link:hover img {
-  opacity: 0.8;
+  transform: translateY(-3%);
+}
+
+@keyframes yt-bounce {
+  0%   { transform: translateY(0);    animation-timing-function: ease-out; }
+  7%   { transform: translateY(-5%);  animation-timing-function: ease-in;  }
+  14%  { transform: translateY(0);    animation-timing-function: ease-out; }
+  22%  { transform: translateY(-5%);  animation-timing-function: ease-in;  }
+  29%  { transform: translateY(0);    animation-timing-function: ease-out; }
+  37%  { transform: translateY(-5%);  animation-timing-function: ease-in;  }
+  44%  { transform: translateY(0);    animation-timing-function: ease-out; }
+  52%  { transform: translateY(-4.5%); animation-timing-function: ease-in; }
+  59%  { transform: translateY(0);    animation-timing-function: ease-out; }
+  67%  { transform: translateY(-3.5%); animation-timing-function: ease-in; }
+  74%  { transform: translateY(0);    animation-timing-function: ease-out; }
+  82%  { transform: translateY(-2%);  animation-timing-function: ease-in;  }
+  89%  { transform: translateY(0);    animation-timing-function: ease-out; }
+  95%  { transform: translateY(-0.5%); animation-timing-function: ease-in; }
+  100% { transform: translateY(0); }
+}
+
+.mother-yt-link.yt-launching {
+  pointer-events: none;
+}
+
+.mother-yt-link.yt-launching img {
+  animation: yt-bounce 3s ease-in-out forwards;
 }
 
 .mother-vhs {
