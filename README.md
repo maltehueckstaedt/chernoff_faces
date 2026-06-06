@@ -8,12 +8,46 @@
 
 ## About
 
-Repository for a small Chernoff Faces website. The website is based on simple HTML, CSS, and JS code. It is intended to be used as an alternative to restrictive and metric-focused social networks. The primary goal of the website is to be beautiful. Practicality is explicitly secondary to this.
+**Chernoff Faces** is a collective of self-taught artists and designers making films. Founded by Malte Hückstädt, the collective takes its name from Herman Chernoff's multivariate data visualization method — not for any particularly serious reason beyond liking the name.
 
-### Hosting
+Originally a data scientist collective, Chernoff Faces has since shifted its focus entirely to independent filmmaking. The work lives online, free from sponsors, grant providers, or producers.
 
-The website is hosted for free on github.io.
+> "The primary goal of the website is to be beautiful. Practicality is explicitly secondary to this."
 
-### Bugs
+## Current Projects
 
-If you encounter any bugs on your device, please report them here in the issue tracker. Thanks!
+| Project | Status | Link |
+|---------|--------|------|
+| **Mother** | Released | [Watch on YouTube](https://www.youtube.com/@chernofffaces) |
+| **Downer** | In development | — |
+
+*Mother* is the first short film by Chernoff Faces. *Downer* is the second.
+
+## Pages
+
+| File | Description |
+|------|-------------|
+| `index.html` | Start page — animated canvas, project navigation |
+| `about.html` | FAQ-style page covering the collective's background and motivations |
+| `mother.html` | Project page for *Mother* with YouTube link |
+| `contact.html` | Contact form |
+| `imprint.html` | Legal imprint (multilingual) |
+
+## Technical Features
+
+- **No build step, no framework** — pure HTML5, CSS3, and vanilla JavaScript
+- **Canvas animations** — a spinning star roams between UI elements, driven by a frame-by-frame animation loop with easing, spin physics, and radius variation
+- **Speech bubble explainer system** — dynamically positioned callout bubbles that follow the animated star and avoid overlapping other elements
+- **Custom typography** — multiple curated font families including German Fraktur and pixel fonts, with animated text morphing between typefaces
+- **Background music player** — optional ambient audio with play/stop controls
+- **`prefers-reduced-motion` support** — animations are disabled when the user has this system setting enabled
+- **Multilingual footer** — imprint and "Enjoy / Thank you" text in English, Chinese, Hindi, Spanish, French, and Arabic
+- **SEO-ready** — Open Graph, Twitter Card, and Schema.org structured data on all pages
+
+## Hosting
+
+Hosted for free on GitHub Pages at [maltehueckstaedt.github.io/chernoff_faces](https://maltehueckstaedt.github.io/chernoff_faces/).
+
+## Bugs
+
+If you encounter any bugs, please report them in the [issue tracker](https://github.com/maltehueckstaedt/chernoff_faces/issues).
