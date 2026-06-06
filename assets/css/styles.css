@@ -259,6 +259,7 @@ a {
   justify-content: center;
   width: 140px;
   height: 52px;
+  flex-shrink: 0;
   border: var(--border-dashed);
   border-radius: 50%;
   letter-spacing: 0.12em;
