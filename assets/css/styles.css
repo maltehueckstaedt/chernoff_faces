@@ -320,8 +320,6 @@ a {
 
 .oval--shaking {
   animation: oval-shake 0.675s ease-in-out;
-  color: var(--color-accent);
-  border-color: var(--color-accent);
 }
 
 
