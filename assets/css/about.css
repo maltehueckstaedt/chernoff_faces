@@ -14,7 +14,7 @@
 .about-content {
   width: min(var(--layout-max), calc(100vw - 6rem));
   margin: 0 auto;
-  padding: 3rem 1rem 4rem;
+  padding: 3rem 2.5rem 4rem;
   display: flex;
   flex: 1;
   flex-direction: column;
