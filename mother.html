@@ -53,19 +53,27 @@
   <script>
     const ytLink = document.querySelector('.mother-yt-link');
     if (ytLink) {
+      const isIOS = /iP(ad|hone|od)/.test(navigator.userAgent) ||
+                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
       ytLink.addEventListener('click', (e) => {
         e.preventDefault();
         const href = ytLink.href;
-        const win = window.open('', '_blank');
         ytLink.classList.add('yt-launching');
-        setTimeout(() => {
-          ytLink.classList.remove('yt-launching');
-          if (win) {
-            win.location.href = href;
-          } else {
-            window.open(href, '_blank');
-          }
-        }, 3000);
+
+        if (isIOS) {
+          setTimeout(() => {
+            ytLink.classList.remove('yt-launching');
+            window.location.href = href;
+          }, 3000);
+        } else {
+          const win = window.open('', '_blank');
+          setTimeout(() => {
+            ytLink.classList.remove('yt-launching');
+            if (win) win.location.href = href;
+            else window.open(href, '_blank');
+          }, 3000);
+        }
       });
     }
   </script>
