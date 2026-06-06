@@ -1051,4 +1051,18 @@ function start() {
 window.addEventListener('resize', start);
 prefersReducedMotion.addEventListener('change', start);
 
+const downerOval = document.querySelector('.downer-oval');
+if (downerOval) {
+  downerOval.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (prefersReducedMotion.matches) return;
+    downerOval.classList.remove('oval--shaking');
+    void downerOval.offsetWidth;
+    downerOval.classList.add('oval--shaking');
+    downerOval.addEventListener('animationend', () => {
+      downerOval.classList.remove('oval--shaking');
+    }, { once: true });
+  });
+}
+
 start();
