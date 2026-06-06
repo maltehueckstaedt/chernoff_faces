@@ -18,6 +18,9 @@
   <meta name="twitter:title" content="Mother – Chernoff Faces" />
   <meta name="twitter:description" content="Mother – the first short film by Chernoff Faces. Watch on YouTube." />
   <meta name="twitter:image" content="https://maltehueckstaedt.github.io/chernoff_faces/assets/images/mother_vhs.webp" />
+  <link rel="icon" type="image/webp" href="assets/images/cf_logo.webp" />
+  <link rel="icon" type="image/png" href="assets/images/cf_logo.png" />
+  <link rel="apple-touch-icon" href="assets/images/cf_logo.png" />
   <link rel="stylesheet" href="assets/css/styles.css" />
   <link rel="stylesheet" href="assets/css/mother.css" />
 </head>
@@ -66,8 +69,7 @@
           if (isIOS) {
             window.location.href = href;
           } else {
-            const win = window.open(href, '_blank', 'noopener,noreferrer');
-            if (!win) window.location.href = href;
+            window.open(href, '_blank');
           }
         }, 3000);
       });
