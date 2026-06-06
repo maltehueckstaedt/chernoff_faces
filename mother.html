@@ -61,19 +61,15 @@
         const href = ytLink.href;
         ytLink.classList.add('yt-launching');
 
-        if (isIOS) {
-          setTimeout(() => {
-            ytLink.classList.remove('yt-launching');
+        setTimeout(() => {
+          ytLink.classList.remove('yt-launching');
+          if (isIOS) {
             window.location.href = href;
-          }, 3000);
-        } else {
-          const win = window.open('', '_blank');
-          setTimeout(() => {
-            ytLink.classList.remove('yt-launching');
-            if (win) win.location.href = href;
-            else window.open(href, '_blank');
-          }, 3000);
-        }
+          } else {
+            const win = window.open(href, '_blank', 'noopener,noreferrer');
+            if (!win) window.location.href = href;
+          }
+        }, 3000);
       });
     }
   </script>
